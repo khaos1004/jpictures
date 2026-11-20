@@ -110,7 +110,7 @@
         "carousel": "J Pictures 오리지널 IP",
         "prev": "이전 작품",
         "next": "다음 작품",
-        "scroll": "SCROLL ↓"
+        "drag": "← DRAG →"
       },
       "status": {
         "planning": "기획중",
@@ -283,7 +283,7 @@
         "carousel": "J Pictures original IP",
         "prev": "Previous title",
         "next": "Next title",
-        "scroll": "SCROLL ↓"
+        "drag": "← DRAG →"
       },
       "status": {
         "planning": "In development",
@@ -456,7 +456,7 @@
         "carousel": "J Pictures オリジナルIP",
         "prev": "前の作品",
         "next": "次の作品",
-        "scroll": "SCROLL ↓"
+        "drag": "← DRAG →"
       },
       "status": {
         "planning": "企画中",

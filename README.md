@@ -34,7 +34,7 @@ npm run build && npm start
 
 ## 구성
 
-OUR IPs 가로 갤러리(휠로 이동 · 패럴랙스 · 거울 바닥) → IP 타이틀 띠 → ABOUT → BUSINESS → AI PIPELINE → CONTACT → 푸터
+OUR IPs 무한 갤러리(자동 회전 · 드래그 · 마우스 오버 카드 효과 · 패럴랙스 · 거울 바닥) → IP 타이틀 띠 → ABOUT → BUSINESS → AI PIPELINE → CONTACT → 푸터
 
 - 모든 섹션은 `.wrap.split`(왼쪽 섹션 이름 / 오른쪽 본문) 한 가지 틀
 - 반응형 점검: 320 · 375 · 390 · 768 · 1024 · 1280 · 1440 · 1920px, 가로 모드 폰까지 3개 언어 모두
