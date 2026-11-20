@@ -87,7 +87,7 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
 .hero-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; display: flex; flex-direction: column; padding-top: calc(var(--hdr) + env(safe-area-inset-top, 0px)); }
 .hero-word { position: absolute; left: 0; right: 0; top: calc(var(--hdr) + 3vh); text-align: center; font-family: var(--latin); font-weight: 700; font-size: clamp(64px, 13vw, 210px); line-height: 1; letter-spacing: -0.065em; color: var(--ghost); white-space: nowrap; pointer-events: none; user-select: none; }
 .track-wrap { position: relative; flex: 1; display: flex; align-items: flex-start; min-height: 0; padding-top: clamp(16px, 5vh, 56px); }
-.track { --cw: clamp(230px, 24vw, 360px); display: flex; gap: clamp(20px, 3vw, 48px); padding-inline: calc(50vw - var(--cw) / 2); will-change: transform; }
+.track { --cw: clamp(230px, 24vw, 360px); display: flex; gap: clamp(20px, 3vw, 48px); will-change: transform; }
 @media (max-width: 700px) { .track { --cw: 68vw; gap: 18px; } }
 .card { flex: none; width: var(--cw); }
 .card-cap { display: grid; gap: 2px; margin-bottom: 14px; min-width: 0; }

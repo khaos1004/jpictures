@@ -38,6 +38,13 @@ function Frame({ w, i }: { w: WorkView; i: number }) {
 
 export default function HeroCarousel({ works, ui }: { works: WorkView[]; ui: Dict["ui"] }) {
   const n = works.length;
+  // 화면 양옆이 비지 않도록 앞에는 마지막 작품들, 뒤에는 첫 작품들을 이어 붙입니다 (필름 릴처럼)
+  const PAD = Math.min(3, n);
+  const reel = [
+    ...works.slice(n - PAD).map((w, k) => ({ w, real: n - PAD + k, clone: true })),
+    ...works.map((w, k) => ({ w, real: k, clone: false })),
+    ...works.slice(0, PAD).map((w, k) => ({ w, real: k, clone: true })),
+  ];
   const secRef = useRef<HTMLElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -47,21 +54,30 @@ export default function HeroCarousel({ works, ui }: { works: WorkView[]; ui: Dic
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [active, setActive] = useState(0);
 
+  // 실제 작품 i 의 카드가 화면 가운데에 올 때의 트랙 이동량
+  const centerOf = (i: number) => {
+    const card = cardRefs.current[PAD + i];
+    return card ? card.offsetLeft + card.offsetWidth / 2 - window.innerWidth / 2 : 0;
+  };
+
   useEffect(() => {
     const sec = secRef.current!;
     const track = trackRef.current!;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const inners = cardRefs.current.map((c) => Array.from(c?.querySelectorAll<HTMLElement>(".card-inner") ?? []));
-    let max = 0;
+    const cards = cardRefs.current.filter((c): c is HTMLDivElement => !!c);
+    const inners = cards.map((c) => Array.from(c.querySelectorAll<HTMLElement>(".card-inner")));
+    let start = 0; // 1번 작품이 가운데일 때
+    let max = 0; // 마지막 작품이 가운데가 될 때까지의 거리
     let cur = 0;
     let target = 0;
     let last = -1;
     let raf = 0;
 
     const measure = () => {
-      max = Math.max(0, track.scrollWidth - window.innerWidth);
+      start = centerOf(0);
+      max = Math.max(0, centerOf(n - 1) - start);
       sec.style.height = `${window.innerHeight + max}px`;
-      const stand = cardRefs.current[0]?.querySelector(".card-stand");
+      const stand = cards[0]?.querySelector(".card-stand");
       if (stand && wrapRef.current && floorRef.current) {
         const top = stand.getBoundingClientRect().bottom - wrapRef.current.getBoundingClientRect().top;
         floorRef.current.style.top = `${top}px`;
@@ -82,14 +98,14 @@ export default function HeroCarousel({ works, ui }: { works: WorkView[]; ui: Dic
     const tick = () => {
       cur += (target - cur) * (reduce ? 1 : 0.085);
       if (Math.abs(target - cur) < 0.05) cur = target;
-      track.style.transform = `translate3d(${-cur}px,0,0)`;
+      const x = start + cur;
+      track.style.transform = `translate3d(${-x}px,0,0)`;
 
       const vw = window.innerWidth;
       let best = 0;
       let bestD = Infinity;
-      cardRefs.current.forEach((card, i) => {
-        if (!card) return;
-        const d = (card.offsetLeft + card.offsetWidth / 2 - cur - vw / 2) / vw;
+      cards.forEach((card, i) => {
+        const d = (card.offsetLeft + card.offsetWidth / 2 - x - vw / 2) / vw;
         if (Math.abs(d) < bestD) {
           bestD = Math.abs(d);
           best = i;
@@ -99,9 +115,10 @@ export default function HeroCarousel({ works, ui }: { works: WorkView[]; ui: Dic
           inners[i].forEach((el) => (el.style.transform = `translate3d(${shift}px,0,0)`));
         }
       });
-      if (best !== last) {
-        last = best;
-        setActive(best);
+      const real = reel[best]?.real ?? 0;
+      if (real !== last) {
+        last = real;
+        setActive(real);
       }
       if (barRef.current) barRef.current.style.transform = `scaleX(${max ? cur / max : 0})`;
       if (hintRef.current) hintRef.current.style.opacity = cur > 40 ? "0" : "1";
@@ -110,23 +127,25 @@ export default function HeroCarousel({ works, ui }: { works: WorkView[]; ui: Dic
 
     measure();
     window.addEventListener("resize", measure);
+    window.addEventListener("load", measure);
     window.addEventListener("scroll", onScroll, { passive: true });
     sec.addEventListener("wheel", onWheel, { passive: false });
     raf = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", measure);
+      window.removeEventListener("load", measure);
       window.removeEventListener("scroll", onScroll);
       sec.removeEventListener("wheel", onWheel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const goTo = (i: number) => {
     const sec = secRef.current;
-    const card = cardRefs.current[(i + n) % n];
-    if (!sec || !card) return;
-    const x = card.offsetLeft + card.offsetWidth / 2 - window.innerWidth / 2;
-    window.scrollTo({ top: sec.offsetTop + Math.max(0, x), behavior: "smooth" });
+    if (!sec) return;
+    const j = (i + n) % n;
+    window.scrollTo({ top: sec.offsetTop + Math.max(0, centerOf(j) - centerOf(0)), behavior: "smooth" });
   };
 
   const cur = works[active];
@@ -142,16 +161,21 @@ export default function HeroCarousel({ works, ui }: { works: WorkView[]; ui: Dic
         <div className="track-wrap" ref={wrapRef}>
           <div className="floor" ref={floorRef} aria-hidden />
           <div className="track" ref={trackRef}>
-            {works.map((w, i) => (
-              <div className="card" key={w.id} ref={(el) => { cardRefs.current[i] = el; }}>
+            {reel.map(({ w, real, clone }, k) => (
+              <div
+                className="card"
+                key={`${k}-${w.id}`}
+                ref={(el) => { cardRefs.current[k] = el; }}
+                aria-hidden={clone || undefined}
+              >
                 <div className="card-cap">
                   <b>{w.title}</b>
                   <span>{w.genre}</span>
                 </div>
                 <div className="card-stand">
-                  <Frame w={w} i={i} />
+                  <Frame w={w} i={real} />
                   <div className="mirror" aria-hidden>
-                    <Frame w={w} i={i} />
+                    <Frame w={w} i={real} />
                   </div>
                 </div>
               </div>

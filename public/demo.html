@@ -96,7 +96,7 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
 .hero-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; display: flex; flex-direction: column; padding-top: calc(var(--hdr) + env(safe-area-inset-top, 0px)); }
 .hero-word { position: absolute; left: 0; right: 0; top: calc(var(--hdr) + 3vh); text-align: center; font-family: var(--latin); font-weight: 700; font-size: clamp(64px, 13vw, 210px); line-height: 1; letter-spacing: -0.065em; color: var(--ghost); white-space: nowrap; pointer-events: none; user-select: none; }
 .track-wrap { position: relative; flex: 1; display: flex; align-items: flex-start; min-height: 0; padding-top: clamp(16px, 5vh, 56px); }
-.track { --cw: clamp(230px, 24vw, 360px); display: flex; gap: clamp(20px, 3vw, 48px); padding-inline: calc(50vw - var(--cw) / 2); will-change: transform; }
+.track { --cw: clamp(230px, 24vw, 360px); display: flex; gap: clamp(20px, 3vw, 48px); will-change: transform; }
 @media (max-width: 700px) { .track { --cw: 68vw; gap: 18px; } }
 .card { flex: none; width: var(--cw); }
 .card-cap { display: grid; gap: 2px; margin-bottom: 14px; min-width: 0; }
@@ -945,8 +945,13 @@ html:lang(ja) { --font-noto: "Noto Sans JP"; }
       return '<a href="#' + l + '" data-lang="' + l + '" lang="' + l + '" title="' + esc(o.langName) + '"' + (l === lang ? ' aria-current="true"' : "") + ">" + o.short + "</a>";
     }).join("");
 
-    var cards = W.map(function (w, i) {
-      return '<div class="card"><div class="card-cap"><b>' + esc(w.title) + "</b><span>" + esc(w.genre) + '</span></div><div class="card-stand">' + frame(w, i) + '<div class="mirror" aria-hidden="true">' + frame(w, i) + "</div></div></div>";
+    var PAD = Math.min(3, W.length);
+    var reel = W.slice(W.length - PAD).map(function (w, k) { return { w: w, i: W.length - PAD + k, c: 1 }; })
+      .concat(W.map(function (w, k) { return { w: w, i: k, c: 0 }; }))
+      .concat(W.slice(0, PAD).map(function (w, k) { return { w: w, i: k, c: 1 }; }));
+    var cards = reel.map(function (r) {
+      var w = r.w, i = r.i;
+      return '<div class="card" data-i="' + i + '"' + (r.c ? ' aria-hidden="true"' : "") + '><div class="card-cap"><b>' + esc(w.title) + "</b><span>" + esc(w.genre) + '</span></div><div class="card-stand">' + frame(w, i) + '<div class="mirror" aria-hidden="true">' + frame(w, i) + "</div></div></div>";
     }).join("");
     var strip = W.concat(W, W).map(function (w) { return '<span class="logo-item"><b>' + esc(w.title) + "</b><span>" + esc(w.en) + "</span></span>"; }).join("");
     var facts = t.about.facts.map(function (l, i) { return "<div><dt>" + esc(l) + "</dt><dd>" + C.facts[i] + "</dd></div>"; }).join("");
@@ -1028,10 +1033,12 @@ html:lang(ja) { --font-noto: "Noto Sans JP"; }
     var sec = document.getElementById("ips"), track = document.getElementById("track");
     var cards = [].slice.call(track.querySelectorAll(".card"));
     var inners = cards.map(function (c) { return [].slice.call(c.querySelectorAll(".card-inner")); });
-    var n = cards.length, max = 0, cur = 0, target = 0, last = -1, raf = 0, alive = true;
+    var n = W.length, PAD = (cards.length - n) / 2, start = 0, max = 0, cur = 0, target = 0, last = -1, raf = 0, alive = true;
+    function centerOf(i) { var c = cards[PAD + i]; return c.offsetLeft + c.offsetWidth / 2 - window.innerWidth / 2; }
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function measure() {
-      max = Math.max(0, track.scrollWidth - window.innerWidth);
+      start = centerOf(0);
+      max = Math.max(0, centerOf(n - 1) - start);
       sec.style.height = window.innerHeight + max + "px";
       var st = cards[0].querySelector(".card-stand");
       document.getElementById("floor").style.top = st.getBoundingClientRect().bottom - document.getElementById("twrap").getBoundingClientRect().top + "px";
@@ -1047,26 +1054,26 @@ html:lang(ja) { --font-noto: "Noto Sans JP"; }
       if (!alive) return;
       cur += (target - cur) * (reduce ? 1 : 0.085);
       if (Math.abs(target - cur) < 0.05) cur = target;
-      track.style.transform = "translate3d(" + -cur + "px,0,0)";
+      var x = start + cur;
+      track.style.transform = "translate3d(" + -x + "px,0,0)";
       var vw = window.innerWidth, best = 0, bestD = 1e9;
       cards.forEach(function (c, i) {
-        var d = (c.offsetLeft + c.offsetWidth / 2 - cur - vw / 2) / vw;
+        var d = (c.offsetLeft + c.offsetWidth / 2 - x - vw / 2) / vw;
         if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = i; }
         if (!reduce) {
           var sh = Math.max(-1, Math.min(1, d)) * c.offsetWidth * 0.12;
           inners[i].forEach(function (el) { el.style.transform = "translate3d(" + sh + "px,0,0)"; });
         }
       });
-      if (best !== last) { last = best; setActive(best); }
+      var real = +cards[best].getAttribute("data-i");
+      if (real !== last) { last = real; setActive(real); }
       document.getElementById("bar").style.transform = "scaleX(" + (max ? cur / max : 0) + ")";
       document.getElementById("hint").style.opacity = cur > 40 ? "0" : "1";
       raf = requestAnimationFrame(tick);
     }
     function goTo(i) {
       i = (i + n) % n;
-      var c = cards[i];
-      var x = c.offsetLeft + c.offsetWidth / 2 - window.innerWidth / 2;
-      window.scrollTo({ top: sec.offsetTop + Math.max(0, x), behavior: "smooth" });
+      window.scrollTo({ top: sec.offsetTop + Math.max(0, centerOf(i) - centerOf(0)), behavior: "smooth" });
     }
     document.getElementById("prev").onclick = function () { goTo(last - 1); };
     document.getElementById("next").onclick = function () { goTo(last + 1); };
