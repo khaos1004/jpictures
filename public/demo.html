@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>J Pictures</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Sora:wght@300;400;600;700&display=swap">
+<style>
+/* ─────────────────────────────────────────────
+   J Pictures 디자인 시스템
+   콘셉트: 흰 무대 위의 IP — 그림자를 드리운 키비주얼 슬라이더, 아웃라인 타이틀 띠, 박스 없는 여백 중심 레이아웃
+   ───────────────────────────────────────────── */
+:root {
+  --bg: #ffffff;
+  --bg-2: #f5f5f3;
+  --fg: #111113;
+  --mute: #8b8b92;
+  --line: #e7e7e4;
+  --ghost: #f0f0ee;
+  --accent: #5b4bff;
+  --sans: var(--font-noto, "Noto Sans KR"), "Apple SD Gothic Neo", system-ui, sans-serif;
+  --latin: var(--font-sora, "Sora"), var(--font-noto, "Noto Sans KR"), system-ui, sans-serif;
+  --hdr: 80px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; scroll-padding-top: var(--hdr); background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-x: hidden; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
+h1, h2, h3, p, dl, dd, ol, ul { margin: 0; }
+ul, ol { list-style: none; padding: 0; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+::selection { background: var(--fg); color: var(--bg); }
+
+.wrap { max-width: 1320px; margin: 0 auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+.sec { padding-block: clamp(110px, 13vw, 180px); }
+.label { font-family: var(--latin); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.title { font-size: clamp(34px, 4.6vw, 60px); font-weight: 800; line-height: 1.2; letter-spacing: -0.045em; }
+.lead { color: var(--mute); max-width: 520px; }
+.tone { background-image: radial-gradient(rgba(255,255,255,.28) 1.1px, transparent 1.3px); background-size: 7px 7px; }
+
+/* ── 헤더 ── */
+.hdr { position: fixed; inset: 0 0 auto; top: env(safe-area-inset-top, 0px); z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: border-color .3s; }
+.hdr.is-solid { border-color: var(--line); }
+.hdr-in { display: flex; align-items: center; justify-content: space-between; height: var(--hdr); }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { display: block; width: 38px; height: 34px; flex: none; }
+.logo-mark path { fill: var(--bg); stroke: var(--fg); stroke-width: 2.4; stroke-linejoin: round; }
+.logo-mark text { fill: var(--fg); font-family: var(--latin); font-weight: 700; font-size: 15px; }
+.wordmark { font-family: var(--latin); font-weight: 700; font-size: 20px; letter-spacing: -0.045em; white-space: nowrap; }
+.wordmark em { font-style: normal; font-weight: 300; }
+.menu { display: flex; align-items: center; gap: clamp(28px, 3.6vw, 52px); }
+.menu a { position: relative; font-family: var(--latin); font-size: 14px; font-weight: 700; letter-spacing: .02em; padding-block: 6px; }
+.menu a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--fg); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
+.menu a:hover::after { transform: scaleX(1); }
+.burger { display: none; width: 42px; height: 42px; background: none; border: 0; cursor: pointer; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.burger span { width: 22px; height: 2px; background: var(--fg); transition: transform .2s; }
+.burger[aria-expanded="true"] span:first-child { transform: translateY(4px) rotate(45deg); }
+.burger[aria-expanded="true"] span:last-child { transform: translateY(-4px) rotate(-45deg); }
+.mmenu { display: flex; flex-direction: column; padding-block: 8px 24px; border-top: 1px solid var(--line); background: var(--bg); }
+.mmenu a { padding: 10px 0; font-family: var(--latin); font-weight: 700; font-size: 26px; letter-spacing: -0.03em; }
+@media (max-width: 880px) { .menu { display: none; } .burger { display: flex; } }
+
+/* ── 히어로: 스크롤로 흐르는 가로 갤러리 ── */
+/* 세로 스크롤(휠) 거리만큼 카드 줄이 가로로 이동하고, 카드 안 그림은 반대로 살짝 밀려 패럴랙스가 생깁니다 */
+.hero { position: relative; }
+.hero-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; display: flex; flex-direction: column; padding-top: calc(var(--hdr) + env(safe-area-inset-top, 0px)); }
+.hero-word { position: absolute; left: 0; right: 0; top: calc(var(--hdr) + 3vh); text-align: center; font-family: var(--latin); font-weight: 700; font-size: clamp(64px, 13vw, 210px); line-height: 1; letter-spacing: -0.065em; color: var(--ghost); white-space: nowrap; pointer-events: none; user-select: none; }
+.track-wrap { position: relative; flex: 1; display: flex; align-items: flex-start; min-height: 0; padding-top: clamp(16px, 5vh, 56px); }
+.track { --cw: clamp(230px, 24vw, 360px); display: flex; gap: clamp(20px, 3vw, 48px); padding-inline: calc(50vw - var(--cw) / 2); will-change: transform; }
+@media (max-width: 700px) { .track { --cw: 68vw; gap: 18px; } }
+.card { flex: none; width: var(--cw); }
+.card-cap { display: grid; gap: 2px; margin-bottom: 14px; min-width: 0; }
+.card-cap b { font-size: clamp(17px, 1.5vw, 21px); font-weight: 800; line-height: 1.35; letter-spacing: -0.035em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-cap span { font-size: 13px; line-height: 1.4; color: var(--mute); white-space: nowrap; }
+.card-stand { position: relative; }
+.card-frame { position: relative; height: min(50vh, calc(var(--cw) * 1.38)); max-width: 100%; border-radius: 14px; overflow: hidden; background: #111; }
+.card-stand > .card-frame { box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 30px 50px -30px rgba(0,0,0,.45); }
+.card-inner { position: absolute; top: 0; bottom: 0; left: -12%; width: 124%; background-size: cover; background-repeat: no-repeat; will-change: transform; }
+.card-inner .scene { position: absolute; inset: 0; }
+.scene-sun { position: absolute; top: 14%; width: 34%; aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); }
+.scene-horizon { position: absolute; left: 0; right: 0; top: 62%; height: 2px; background: rgba(255,255,255,.4); }
+.scene-word { position: absolute; left: 4%; bottom: 7%; font-family: var(--latin); font-weight: 700; font-size: calc(var(--cw) * 0.36); line-height: .9; letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 1.2px rgba(255,255,255,.4); white-space: nowrap; }
+.card-inner .tone { position: absolute; inset: 0; opacity: .45; mix-blend-mode: overlay; }
+.card-tag { position: absolute; left: 14px; top: 12px; z-index: 2; font-family: var(--latin); font-size: 11px; font-weight: 600; letter-spacing: .16em; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+/* 유광 하이라이트: 카드 윗면에 비스듬히 지나가는 빛 */
+.card-stand > .card-frame::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 68%, rgba(255,255,255,.08) 100%); }
+
+/* ── 거울 바닥 반사 ── */
+.mirror { position: absolute; left: 0; right: 0; top: calc(100% + 2px); pointer-events: none; transform: scaleY(-1); transform-origin: 50% 50%; }
+.mirror .card-frame { border-radius: 14px; filter: blur(.6px) saturate(1.1); -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,.42) 0%, rgba(0,0,0,.16) 22%, rgba(0,0,0,0) 46%); mask-image: linear-gradient(to top, rgba(0,0,0,.42) 0%, rgba(0,0,0,.16) 22%, rgba(0,0,0,0) 46%); }
+.mirror .card-tag { display: none; }
+/* 바닥면: 카드가 서 있는 선과 은은한 광택 */
+.floor { position: absolute; left: 0; right: 0; z-index: 0; pointer-events: none; height: 1px; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,.12) 20%, rgba(0,0,0,.12) 80%, rgba(0,0,0,0)); }
+.floor::after { content: ""; position: absolute; left: 0; right: 0; top: 1px; height: 26vh; background: linear-gradient(to bottom, rgba(17,17,19,.03), rgba(17,17,19,0)); -webkit-mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); }
+.track { position: relative; z-index: 1; }
+
+.hero-bar { position: relative; z-index: 2; width: 100%; display: grid; grid-template-columns: 1fr minmax(0, 2fr) 1fr; align-items: center; gap: 20px; padding-bottom: clamp(24px, 4vh, 44px); }
+.hb-idx { min-width: 0; font-family: var(--latin); font-size: 13px; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hb-idx b { color: var(--fg); font-size: 15px; }
+.hb-title { font-size: 15px; font-weight: 700; margin-left: 10px; color: var(--fg); }
+.progress { position: relative; height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.progress i { position: absolute; inset: 0; background: var(--fg); transform-origin: left; transform: scaleX(0); }
+.hb-ctrl { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.hb-ctrl button { width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid var(--fg); background: var(--bg); cursor: pointer; font-size: 17px; transition: background .2s, color .2s; }
+.hb-ctrl button:hover { background: var(--fg); color: var(--bg); }
+.hint { position: absolute; z-index: 2; left: 50%; bottom: calc(clamp(24px, 4vh, 44px) + 60px); transform: translateX(-50%); font-family: var(--latin); font-size: 11px; font-weight: 600; letter-spacing: .2em; color: var(--mute); transition: opacity .4s; pointer-events: none; }
+/* 태블릿: 카드를 키워 빈 공간을 줄임 */
+@media (min-width: 701px) and (max-width: 1100px) { .track { --cw: clamp(260px, 38vw, 380px); } }
+/* 폰 */
+@media (max-width: 700px) {
+  :root { --hdr: 64px; }
+  .hint, .hero-word { display: none; }
+  .hero-bar { grid-template-columns: 1fr auto; }
+  .progress { grid-column: 1 / -1; grid-row: 2; }
+  .hb-title { display: none; }
+}
+
+/* 가로로 눕힌 폰 등 세로가 낮은 화면: 카드 크기를 화면 높이에 맞춤 */
+@media (max-height: 520px) {
+  :root { --hdr: 60px; }
+  .hero-sticky { min-height: 0; }
+  .hero-word, .hint { display: none; }
+  .track-wrap { padding-top: 10px; }
+  .track { --cw: calc((100svh - var(--hdr) - 150px) / 1.3); }
+  .card-frame { height: calc(100svh - var(--hdr) - 150px); }
+  .card-cap { margin-bottom: 8px; }
+  .card-cap span { display: none; }
+  .hero-bar { padding-bottom: 12px; }
+  .hb-ctrl button { width: 40px; height: 40px; }
+}
+
+/* ── IP 타이틀 띠 ── */
+.logos { border-block: 1px solid var(--line); overflow: hidden; padding-block: 30px; background: var(--bg); }
+.logos-track { display: flex; width: max-content; animation: flow 42s linear infinite; }
+.logos:hover .logos-track { animation-play-state: paused; }
+.logo-item { display: flex; align-items: baseline; gap: 14px; padding-right: 72px; white-space: nowrap; }
+.logo-item b { font-weight: 700; font-size: clamp(30px, 3.6vw, 48px); letter-spacing: -0.04em; color: transparent; -webkit-text-stroke: 1px var(--fg); transition: color .3s; }
+.logo-item span { font-family: var(--latin); font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--mute); }
+.logo-item:hover b { color: var(--fg); }
+@keyframes flow { to { transform: translateX(-50%); } }
+
+/* ── ABOUT ── */
+.about { display: grid; grid-template-columns: 220px 1fr; gap: clamp(32px, 5vw, 80px); }
+@media (max-width: 860px) { .about { grid-template-columns: 1fr; } }
+.statement { font-size: clamp(34px, 5vw, 68px); font-weight: 800; line-height: 1.22; letter-spacing: -0.05em; }
+.statement em { font-style: normal; color: var(--accent); }
+.about-sub { margin-top: clamp(44px, 6vw, 72px); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 80px); align-items: start; }
+@media (max-width: 760px) { .about-sub { grid-template-columns: 1fr; } }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px clamp(24px, 4vw, 56px); }
+.facts dt { white-space: nowrap; }
+.facts dt { font-size: 13px; color: var(--mute); }
+.facts dd { font-family: var(--latin); font-weight: 600; font-size: clamp(36px, 4vw, 52px); line-height: 1.1; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+.values { margin-top: clamp(80px, 9vw, 120px); display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 56px); }
+@media (max-width: 800px) { .values { grid-template-columns: 1fr; } }
+.values li { border-top: 2px solid var(--fg); padding-top: 20px; }
+.values small { font-family: var(--latin); font-size: 12px; font-weight: 700; color: var(--mute); }
+.values h3 { margin-top: 18px; font-size: 22px; font-weight: 800; }
+.values p { margin-top: 10px; color: var(--mute); font-size: 15px; }
+
+/* ── BUSINESS ── */
+.biz-sec { background: var(--bg-2); }
+.sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(48px, 6vw, 80px); }
+.sec-head .title { margin-top: 14px; }
+.biz { border-top: 1px solid var(--fg); }
+.biz li { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; padding-block: clamp(28px, 3.4vw, 40px); border-bottom: 1px solid #d9d9d5; }
+.biz .word { font-family: var(--latin); font-weight: 700; font-size: clamp(48px, 6.4vw, 92px); line-height: 1; letter-spacing: -0.065em; color: transparent; -webkit-text-stroke: 1.2px var(--fg); transition: color .35s; }
+.biz li:hover .word { color: var(--fg); }
+.biz h3 { font-size: clamp(20px, 2vw, 24px); font-weight: 800; }
+.biz p { color: var(--mute); font-size: 15px; }
+.biz .tags { margin-top: 6px; font-size: 13px; color: var(--fg); }
+@media (max-width: 860px) { .biz li { grid-template-columns: 1fr; gap: 10px; } }
+
+/* ── PIPELINE ── */
+.flow { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.flow::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 1px; background: var(--line); }
+.flow li { position: relative; padding-top: 36px; }
+.flow li::before { content: ""; position: absolute; left: 0; top: 0; width: 15px; height: 15px; border-radius: 50%; background: var(--bg); border: 2px solid var(--fg); animation: stepLit 7.2s infinite; }
+.flow li:nth-child(2)::before { animation-delay: 1.2s; }
+.flow li:nth-child(3)::before { animation-delay: 2.4s; }
+.flow li:nth-child(4)::before { animation-delay: 3.6s; }
+.flow li:nth-child(5)::before { animation-delay: 4.8s; }
+.flow li:nth-child(6)::before { animation-delay: 6s; }
+@keyframes stepLit {
+  0%, 100% { background: var(--bg); box-shadow: 0 0 0 0 rgba(91,75,255,0); border-color: var(--fg); }
+  5%, 15% { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 6px rgba(91,75,255,.18); }
+  22% { background: var(--bg); box-shadow: 0 0 0 0 rgba(91,75,255,0); border-color: var(--fg); }
+}
+.flow small { font-family: var(--latin); font-size: 12px; font-weight: 700; color: var(--mute); }
+.flow b { display: block; margin-top: 6px; font-size: 19px; font-weight: 800; letter-spacing: -0.03em; }
+.flow p { margin-top: 6px; font-size: 14px; color: var(--mute); line-height: 1.6; }
+@media (max-width: 900px) {
+  .flow { grid-template-columns: 1fr; gap: 0; padding-left: 4px; }
+  .flow::before { left: 11px; right: auto; top: 8px; bottom: 8px; width: 1px; height: auto; }
+  .flow li { padding: 0 0 28px 40px; }
+  .flow li::before { left: 4px; top: 4px; }
+}
+
+/* ── CONTACT ── */
+.contact-sec { border-top: 1px solid var(--line); }
+.contact { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(48px, 7vw, 110px); }
+@media (max-width: 900px) { .contact { grid-template-columns: 1fr; } }
+.contact .title { margin-top: 14px; }
+.mail-big { display: inline-block; margin-top: 36px; font-family: var(--latin); font-weight: 600; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: -0.03em; border-bottom: 2px solid var(--fg); overflow-wrap: anywhere; }
+.info { margin-top: 36px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+.info > div { display: grid; grid-template-columns: 70px 1fr; gap: 16px; }
+.info dt { color: var(--mute); }
+.info dd { min-width: 0; overflow-wrap: anywhere; }
+.form { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.types { display: flex; flex-wrap: wrap; gap: 6px; border: 0; padding: 0; margin: 0 0 18px; }
+.types button { border: 1.5px solid var(--line); background: var(--bg); color: var(--mute); border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: .2s; }
+.types button[aria-pressed="true"] { border-color: var(--fg); background: var(--fg); color: var(--bg); }
+.field { width: 100%; border: 0; border-bottom: 1.5px solid var(--line); background: transparent; padding: 16px 0; font: inherit; font-size: 16px; color: var(--fg); resize: none; border-radius: 0; transition: border-color .2s; }
+.field::placeholder { color: #a9a9af; }
+.field:focus { outline: none; border-color: var(--fg); }
+.submit { margin-top: 26px; align-self: flex-start; display: inline-flex; align-items: center; gap: 12px; padding: 16px 30px; border-radius: 999px; border: 0; background: var(--fg); color: var(--bg); font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s; }
+.submit:hover { background: var(--accent); }
+.form-note { margin-top: 16px; background: var(--bg-2); border-radius: 10px; padding: 14px 16px; font-size: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── 푸터 ── */
+.foot { background: var(--bg-2); padding-block: 48px 40px; font-size: 13px; color: var(--mute); }
+.foot-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; align-items: center; padding-bottom: 26px; border-bottom: 1px solid #dcdcd8; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 26px; font-size: 14px; font-weight: 600; color: var(--fg); }
+.foot-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.foot-info { padding-top: 22px; display: flex; flex-wrap: wrap; gap: 4px 18px; line-height: 1.8; }
+.foot-info b { font-weight: 500; color: var(--fg); margin-right: 6px; }
+.copy { margin-top: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .logos-track, .flow li::before { animation: none; }
+}
+</style>
+<header class="hdr" id="hdr">
+  <div class="wrap">
+    <div class="hdr-in">
+      <a href="#top" class="logo"><svg class="logo-mark" viewBox="0 0 40 36" aria-hidden="true"><path d="M20 3C29.4 3 37 9.3 37 17s-7.6 14-17 14c-2.4 0-4.7-.4-6.7-1.2L5.5 33l2.7-6.5C5 24 3 20.7 3 17 3 9.3 10.6 3 20 3Z"/><text x="20" y="22.5" text-anchor="middle">J</text></svg><span class="wordmark">J <em>Pictures</em></span></a>
+      <nav class="menu" aria-label="주 메뉴"><a href="#about">ABOUT</a><a href="#ips">OUR IPs</a><a href="#business">BUSINESS</a><a href="#pipeline">PIPELINE</a><a href="#contact">CONTACT</a></nav>
+      <button class="burger" id="burger" aria-label="메뉴" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+  <nav class="mmenu wrap" id="mmenu" hidden><a href="#about">ABOUT</a><a href="#ips">OUR IPs</a><a href="#business">BUSINESS</a><a href="#pipeline">PIPELINE</a><a href="#contact">CONTACT</a></nav>
+</header>
+
+<main id="top">
+  <section class="hero" id="ips" aria-label="J Pictures 오리지널 IP">
+    <div class="hero-sticky">
+      <p class="hero-word" id="word" aria-hidden="true"></p>
+      <div class="track-wrap" id="twrap"><div class="floor" id="floor" aria-hidden="true"></div><div class="track" id="track"><div class="card"><div class="card-cap"><b>개같은 여과장이야</b><span>오피스 드라마</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">01</span><div class="card-inner" style="background-image:url(works/01.jpg);background-position:50% 0%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">01</span><div class="card-inner" style="background-image:url(works/01.jpg);background-position:50% 0%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>밤의 계약</b><span>로맨스</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">02</span><div class="card-inner" style="background-image:url(works/02.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">02</span><div class="card-inner" style="background-image:url(works/02.jpg);background-position:50% 25%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>열대야</b><span>로맨스 코미디</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">03</span><div class="card-inner" style="background-image:url(works/03.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">03</span><div class="card-inner" style="background-image:url(works/03.jpg);background-position:50% 25%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>붉은 서재</b><span>미스터리</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">04</span><div class="card-inner" style="background-image:url(works/04.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">04</span><div class="card-inner" style="background-image:url(works/04.jpg);background-position:50% 25%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>블랙 베일</b><span>드라마</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">05</span><div class="card-inner" style="background-image:url(works/05.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">05</span><div class="card-inner" style="background-image:url(works/05.jpg);background-position:50% 25%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>유리 정원</b><span>로맨스</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">06</span><div class="card-inner" style="background-image:url(works/06.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">06</span><div class="card-inner" style="background-image:url(works/06.jpg);background-position:50% 25%"></div></div></div></div></div></div></div>
+      <p class="hint" id="hint" aria-hidden="true">SCROLL ↓</p>
+      <div class="wrap hero-bar">
+        <p class="hb-idx" aria-live="polite"><b id="idx">01</b> / 06<span class="hb-title" id="hbT"></span></p>
+        <div class="progress"><i id="bar"></i></div>
+        <div class="hb-ctrl"><button id="prev" aria-label="이전 작품">←</button><button id="next" aria-label="다음 작품">→</button></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="logos" aria-hidden="true"><div class="logos-track"><span class="logo-item"><b>밤의 계약</b><span>The Night Contract</span></span><span class="logo-item"><b>붉은 서재</b><span>Scarlet Library</span></span><span class="logo-item"><b>열대야</b><span>Tropical Night</span></span><span class="logo-item"><b>블랙 베일</b><span>Black Veil</span></span><span class="logo-item"><b>유리 정원</b><span>Glass Garden</span></span><span class="logo-item"><b>오후 세 시</b><span>3 PM</span></span><span class="logo-item"><b>밤의 계약</b><span>The Night Contract</span></span><span class="logo-item"><b>붉은 서재</b><span>Scarlet Library</span></span><span class="logo-item"><b>열대야</b><span>Tropical Night</span></span><span class="logo-item"><b>블랙 베일</b><span>Black Veil</span></span><span class="logo-item"><b>유리 정원</b><span>Glass Garden</span></span><span class="logo-item"><b>오후 세 시</b><span>3 PM</span></span><span class="logo-item"><b>밤의 계약</b><span>The Night Contract</span></span><span class="logo-item"><b>붉은 서재</b><span>Scarlet Library</span></span><span class="logo-item"><b>열대야</b><span>Tropical Night</span></span><span class="logo-item"><b>블랙 베일</b><span>Black Veil</span></span><span class="logo-item"><b>유리 정원</b><span>Glass Garden</span></span><span class="logo-item"><b>오후 세 시</b><span>3 PM</span></span></div></div>
+
+  <section class="sec" id="about">
+    <div class="wrap">
+      <div class="about">
+        <p class="label">About</p>
+        <div>
+          <h2 class="statement">그림은 <em>AI가 빠르게</em>,<br>이야기와 연출은 <em>사람이 끝까지</em>.</h2>
+          <div class="about-sub">
+            <p class="lead">J Pictures는 2026년 설립된 AI 웹툰 제작사입니다. AI 이미지 생성 기반의 제작 공정으로 오리지널 IP를 기획하고 만들어 국내외 플랫폼에 선보입니다.</p>
+            <dl class="facts"><div><dt>설립</dt><dd>2026</dd></div><div><dt>개발 중인 오리지널 IP</dt><dd>6</dd></div><div><dt>AI 제작 공정 단계</dt><dd>6</dd></div><div><dt>사업 분야</dt><dd>4</dd></div></dl>
+          </div>
+          <ul class="values"><li><small>01</small><h3>이야기 중심</h3><p>기술은 도구일 뿐, 독자를 붙잡는 건 이야기입니다. 시즌 단위로 서사를 먼저 설계합니다.</p></li><li><small>02</small><h3>AI 제작 파이프라인</h3><p>AI 이미지 생성과 자체 워크플로로 기획에서 원고까지의 시간을 크게 줄입니다.</p></li><li><small>03</small><h3>일관된 퀄리티</h3><p>캐릭터 시트와 스타일 가이드로 화마다 같은 얼굴, 같은 톤을 유지하고 최종 컷은 직접 보정합니다.</p></li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec biz-sec" id="business">
+    <div class="wrap">
+      <div class="sec-head"><div><p class="label">Business</p><h2 class="title">기획부터 유통까지</h2></div><p class="lead">하나의 IP가 태어나 독자를 만나기까지, 모든 과정을 J Pictures가 직접 합니다.</p></div>
+      <ul class="biz"><li><span class="word">Plan</span><h3>오리지널 IP 기획</h3><div><p>세계관과 캐릭터, 시즌 구성까지 오리지널 웹툰 IP를 자체 기획합니다.</p><p class="tags">장르 리서치 · 시놉시스 · 캐릭터 설계</p></div></li><li><span class="word">Create</span><h3>AI 웹툰 제작</h3><div><p>AI 이미지 생성 기반의 제작 공정으로 연재 원고를 빠르고 안정적으로 만듭니다.</p><p class="tags">이미지 생성 · 리터칭 · 연출 편집 · 식자</p></div></li><li><span class="word">Design</span><h3>비주얼 개발</h3><div><p>캐릭터 시트, 배경 콘셉트, 작품별 스타일 가이드를 구축합니다.</p><p class="tags">캐릭터 시트 · 스타일 가이드 · 배경 콘셉트</p></div></li><li><span class="word">Launch</span><h3>유통 · 해외 진출</h3><div><p>국내 플랫폼 연재와 해외 현지화·유통을 진행합니다.</p><p class="tags">플랫폼 런칭 · 현지화 · AI 활용 표기 준수</p></div></li></ul>
+    </div>
+  </section>
+
+  <section class="sec" id="pipeline">
+    <div class="wrap">
+      <div class="sec-head"><div><p class="label">AI Pipeline</p><h2 class="title">AI로 그리고, 감각으로 완성합니다</h2></div><p class="lead">생성된 컷은 그대로 쓰지 않습니다. 연출과 디테일을 직접 다듬어 작품의 톤을 지킵니다.</p></div>
+      <ol class="flow"><li><small>STEP 01</small><b>기획</b><p>시놉시스, 회차 구성, 캐릭터 설정</p></li><li><small>STEP 02</small><b>콘티 · 프롬프트</b><p>컷 구성과 연출을 생성용 설계로 변환</p></li><li><small>STEP 03</small><b>AI 이미지 생성</b><p>캐릭터 일관성을 유지하며 컷 생성</p></li><li><small>STEP 04</small><b>리터칭 · 보정</b><p>표정·손·디테일을 사람이 직접 다듬기</p></li><li><small>STEP 05</small><b>편집 · 식자</b><p>말풍선, 효과음, 세로 스크롤 연출</p></li><li><small>STEP 06</small><b>검수 · 연재</b><p>품질·등급 검수 후 플랫폼 런칭</p></li></ol>
+    </div>
+  </section>
+
+  <section class="sec contact-sec" id="contact">
+    <div class="wrap contact">
+      <div>
+        <p class="label">Contact</p>
+        <h2 class="title">다음 IP를<br>함께 만들어요</h2>
+        <p class="mail-big">contact@jpictures.kr</p>
+        <dl class="info"><div><dt>전화</dt><dd>02-000-0000</dd></div><div><dt>주소</dt><dd>서울특별시 마포구 월드컵북로 00, 0층</dd></div></dl>
+      </div>
+      <form class="form" id="form" novalidate>
+        <fieldset class="types" id="types"><legend class="sr">문의 유형</legend></fieldset>
+        <input class="field" id="f-name" placeholder="이름 / 회사명">
+        <input class="field" id="f-email" type="email" placeholder="이메일">
+        <textarea class="field" id="f-msg" rows="4" placeholder="문의 내용"></textarea>
+        <button type="submit" class="submit">문의 보내기 →</button>
+        <p class="form-note" id="note" hidden></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <a href="#top" class="logo"><svg class="logo-mark" viewBox="0 0 40 36" aria-hidden="true"><path d="M20 3C29.4 3 37 9.3 37 17s-7.6 14-17 14c-2.4 0-4.7-.4-6.7-1.2L5.5 33l2.7-6.5C5 24 3 20.7 3 17 3 9.3 10.6 3 20 3Z"/><text x="20" y="22.5" text-anchor="middle">J</text></svg><span class="wordmark">J <em>Pictures</em></span></a>
+      <nav class="foot-links" aria-label="하단 메뉴"><a href="#contact">찾아오시는 길</a><a href="#top">개인정보 처리방침</a></nav>
+    </div>
+    <div class="foot-info"><span><b>제이픽처스</b></span><span><b>대표자명</b>홍길동</span><span><b>사업자등록번호</b>000-00-00000</span><span><b>주소</b>서울특별시 마포구 월드컵북로 00, 0층</span><span><b>대표전화</b>02-000-0000</span><span><b>이메일</b>contact@jpictures.kr</span></div>
+    <p class="copy">Copyright J Pictures. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var W=[{"t": "개같은 여과장이야", "e": "Office Queen", "g": "오피스 드라마", "s": "제작중"}, {"t": "밤의 계약", "e": "The Night Contract", "g": "로맨스", "s": "제작중"}, {"t": "열대야", "e": "Tropical Night", "g": "로맨스 코미디", "s": "기획중"}, {"t": "붉은 서재", "e": "Scarlet Library", "g": "미스터리", "s": "기획중"}, {"t": "블랙 베일", "e": "Black Veil", "g": "드라마", "s": "기획중"}, {"t": "유리 정원", "e": "Glass Garden", "g": "로맨스", "s": "공개예정"}];
+  var hdr=document.getElementById("hdr"),burger=document.getElementById("burger"),mm=document.getElementById("mmenu");
+  function solid(){hdr.classList.toggle("is-solid",window.scrollY>10||!mm.hidden)}
+  window.addEventListener("scroll",solid,{passive:true});solid();
+  burger.addEventListener("click",function(){var o=mm.hidden;mm.hidden=!o;burger.setAttribute("aria-expanded",String(o));solid()});
+  mm.addEventListener("click",function(e){if(e.target.tagName==="A"){mm.hidden=true;burger.setAttribute("aria-expanded","false");solid()}});
+
+  var sec=document.getElementById("ips"),track=document.getElementById("track");
+  var cards=[].slice.call(track.querySelectorAll(".card")),inners=cards.map(function(c){return [].slice.call(c.querySelectorAll(".card-inner"))});
+  var n=cards.length,max=0,cur=0,target=0,last=-1;
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function pad(v){return ("0"+v).slice(-2)}
+  function measure(){max=Math.max(0,track.scrollWidth-window.innerWidth);sec.style.height=(window.innerHeight+max)+"px";var st=cards[0].querySelector(".card-stand");document.getElementById("floor").style.top=(st.getBoundingClientRect().bottom-document.getElementById("twrap").getBoundingClientRect().top)+"px";onScroll()}
+  function onScroll(){var top=sec.getBoundingClientRect().top;target=Math.min(max,Math.max(0,-top))}
+  function setActive(i){var w=W[i];document.getElementById("word").textContent=w.e;document.getElementById("idx").textContent=pad(i+1);document.getElementById("hbT").textContent=w.t}
+  function tick(){
+    cur+=(target-cur)*(reduce?1:0.085); if(Math.abs(target-cur)<0.05)cur=target;
+    track.style.transform="translate3d("+(-cur)+"px,0,0)";
+    var vw=window.innerWidth,best=0,bestD=1e9;
+    cards.forEach(function(c,i){
+      var d=(c.offsetLeft+c.offsetWidth/2-cur-vw/2)/vw;
+      if(Math.abs(d)<bestD){bestD=Math.abs(d);best=i}
+      if(!reduce){var sh=Math.max(-1,Math.min(1,d))*c.offsetWidth*0.12;inners[i].forEach(function(el){el.style.transform="translate3d("+sh+"px,0,0)"})}
+    });
+    if(best!==last){last=best;setActive(best)}
+    document.getElementById("bar").style.transform="scaleX("+(max?cur/max:0)+")";
+    document.getElementById("hint").style.opacity=cur>40?"0":"1";
+    requestAnimationFrame(tick);
+  }
+  function goTo(i){i=(i+n)%n;var c=cards[i];var x=c.offsetLeft+c.offsetWidth/2-window.innerWidth/2;window.scrollTo({top:sec.offsetTop+Math.max(0,x),behavior:"smooth"})}
+  document.getElementById("prev").onclick=function(){goTo(last-1)};
+  document.getElementById("next").onclick=function(){goTo(last+1)};
+  sec.addEventListener("wheel",function(e){if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){e.preventDefault();window.scrollBy(0,e.deltaX)}},{passive:false});
+  window.addEventListener("resize",measure);window.addEventListener("load",measure);
+  window.addEventListener("scroll",onScroll,{passive:true});
+  measure();requestAnimationFrame(tick);
+
+  var types=["작품 제휴","IP 라이선스","협업 제안","기타"],curType=types[0],box=document.getElementById("types");
+  types.forEach(function(t){var b=document.createElement("button");b.type="button";b.textContent=t;b.setAttribute("aria-pressed",String(t===curType));box.appendChild(b)});
+  box.addEventListener("click",function(e){if(e.target.tagName!=="BUTTON")return;curType=e.target.textContent;box.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",String(b.textContent===curType))})});
+  document.getElementById("form").addEventListener("submit",function(e){
+    e.preventDefault();
+    var ok=["f-name","f-email","f-msg"].every(function(id){return document.getElementById(id).value.trim()});
+    var note=document.getElementById("note");note.hidden=false;
+    note.textContent=ok?"데모 페이지라 실제로 전송되지는 않습니다. 실제 사이트에서는 ["+curType+"] 문의가 contact@jpictures.kr 메일 작성 창으로 연결됩니다.":"이름, 이메일, 문의 내용을 모두 입력해 주세요.";
+  });
+})();
+</script>
+
+</html>
