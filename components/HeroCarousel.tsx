@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Work } from "@/lib/data";
+import type { Dict, WorkView } from "@/lib/i18n";
 
 /**
  * 메인 갤러리
@@ -10,7 +10,7 @@ import type { Work } from "@/lib/data";
  * - 카드 아래 바닥에는 거울 반사가 비치고, 반사에도 같은 패럴랙스가 적용됩니다.
  */
 
-function Frame({ w, i }: { w: Work; i: number }) {
+function Frame({ w, i }: { w: WorkView; i: number }) {
   return (
     <div className="card-frame">
       <span className="card-tag">{String(i + 1).padStart(2, "0")}</span>
@@ -20,7 +20,7 @@ function Frame({ w, i }: { w: Work; i: number }) {
           backgroundImage: w.image
             ? `url(${w.image})`
             : `radial-gradient(70% 60% at 38% 30%, ${w.colors[0]}, ${w.colors[1]} 78%)`,
-          backgroundPosition: w.focus ?? "50% 25%",
+          backgroundPosition: w.focus || "50% 25%",
         }}
       >
         {!w.image && (
@@ -36,7 +36,7 @@ function Frame({ w, i }: { w: Work; i: number }) {
   );
 }
 
-export default function HeroCarousel({ works }: { works: Work[] }) {
+export default function HeroCarousel({ works, ui }: { works: WorkView[]; ui: Dict["ui"] }) {
   const n = works.length;
   const secRef = useRef<HTMLElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -133,7 +133,7 @@ export default function HeroCarousel({ works }: { works: Work[] }) {
   const pad = (v: number) => String(v).padStart(2, "0");
 
   return (
-    <section className="hero" id="ips" ref={secRef} aria-label="J Pictures 오리지널 IP">
+    <section className="hero" id="ips" ref={secRef} aria-label={ui.carousel}>
       <div className="hero-sticky">
         <p className="hero-word" aria-hidden>
           {cur.en}
@@ -143,7 +143,7 @@ export default function HeroCarousel({ works }: { works: Work[] }) {
           <div className="floor" ref={floorRef} aria-hidden />
           <div className="track" ref={trackRef}>
             {works.map((w, i) => (
-              <div className="card" key={w.title} ref={(el) => { cardRefs.current[i] = el; }}>
+              <div className="card" key={w.id} ref={(el) => { cardRefs.current[i] = el; }}>
                 <div className="card-cap">
                   <b>{w.title}</b>
                   <span>{w.genre}</span>
@@ -160,7 +160,7 @@ export default function HeroCarousel({ works }: { works: Work[] }) {
         </div>
 
         <p className="hint" ref={hintRef} aria-hidden>
-          SCROLL ↓
+          {ui.scroll}
         </p>
 
         <div className="wrap hero-bar">
@@ -172,10 +172,10 @@ export default function HeroCarousel({ works }: { works: Work[] }) {
             <i ref={barRef} />
           </div>
           <div className="hb-ctrl">
-            <button aria-label="이전 작품" onClick={() => goTo(active - 1)}>
+            <button aria-label={ui.prev} onClick={() => goTo(active - 1)}>
               ←
             </button>
-            <button aria-label="다음 작품" onClick={() => goTo(active + 1)}>
+            <button aria-label={ui.next} onClick={() => goTo(active + 1)}>
               →
             </button>
           </div>

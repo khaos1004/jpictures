@@ -2,13 +2,15 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>J Pictures</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%0A%20%20%3Cpath%20fill%3D%22%235b4bff%22%20d%3D%22M32%205c15.5%200%2028%2010.3%2028%2023S47.5%2051%2032%2051c-3.6%200-7-.5-10.2-1.5L9%2058l3.6-13.1C7.3%2040.6%204%2034.6%204%2028%204%2015.3%2016.5%205%2032%205Z%22/%3E%0A%20%20%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M35.5%2016h7v17.2c0%207.3-4.3%2011.3-11.2%2011.3-3.2%200-6-.8-8.3-2.4l2.2-5.6c1.6%201.1%203.5%201.8%205.4%201.8%203.1%200%204.9-1.7%204.9-5.6V22h-6.5v-6h6.5Z%22/%3E%0A%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Sora:wght@300;400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Noto+Sans+JP:wght@400;500;700;800;900&family=Sora:wght@300;400;600;700&display=swap">
 <style>
 /* ─────────────────────────────────────────────
    J Pictures 디자인 시스템
-   콘셉트: 흰 무대 위의 IP — 그림자를 드리운 키비주얼 슬라이더, 아웃라인 타이틀 띠, 박스 없는 여백 중심 레이아웃
+   콘셉트: 흰 무대 위의 IP — 휠로 흐르는 키비주얼 갤러리와 거울 바닥, 아웃라인 타이틀 띠, 박스 없는 여백 중심 레이아웃
+   레이아웃: 모든 섹션은 .wrap.split (왼쪽 섹션 이름 / 오른쪽 본문) 한 가지 틀을 씁니다
    ───────────────────────────────────────────── */
 :root {
   --bg: #ffffff;
@@ -27,7 +29,12 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; scroll-padding-top: var(--hdr); background: var(--bg); }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-x: hidden; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; overflow-x: hidden; }
+/* 일본어는 띄어쓰기가 없어 keep-all 이면 줄이 넘칩니다 → 글자 단위 줄바꿈 + 금칙 처리 */
+html:lang(ja) body { word-break: normal; line-break: strict; }
+/* 일본어 제목·짧은 문구는 구(phrase) 단위로 줄바꿈 (지원 브라우저) */
+html:lang(ja) :is(h1, h2, h3, .statement, .title, .flow b, .card-cap b, .facts dt) { word-break: auto-phrase; }
+html:lang(en) body { word-break: normal; hyphens: manual; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
 h1, h2, h3, p, dl, dd, ol, ul { margin: 0; }
 ul, ol { list-style: none; padding: 0; }
@@ -38,9 +45,14 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
 ::selection { background: var(--fg); color: var(--bg); }
 
 .wrap { max-width: 1320px; margin: 0 auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
-.sec { padding-block: clamp(110px, 13vw, 180px); }
+.sec { padding-block: clamp(96px, 12vw, 168px); }
+.split { display: grid; grid-template-columns: clamp(140px, 15vw, 210px) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); }
+.split > .label { padding-top: 10px; }
+.split-body { min-width: 0; }
+@media (max-width: 900px) { .split { grid-template-columns: minmax(0, 1fr); gap: 18px; } .split > .label { padding-top: 0; } }
 .label { font-family: var(--latin); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-.title { font-size: clamp(34px, 4.6vw, 60px); font-weight: 800; line-height: 1.2; letter-spacing: -0.045em; }
+.title { font-size: clamp(30px, 4.2vw, 56px); font-weight: 800; line-height: 1.22; letter-spacing: -0.045em; }
+.title em { font-style: normal; color: var(--accent); }
 .lead { color: var(--mute); max-width: 520px; }
 .tone { background-image: radial-gradient(rgba(255,255,255,.28) 1.1px, transparent 1.3px); background-size: 7px 7px; }
 
@@ -54,7 +66,8 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
 .logo-mark text { fill: var(--fg); font-family: var(--latin); font-weight: 700; font-size: 15px; }
 .wordmark { font-family: var(--latin); font-weight: 700; font-size: 20px; letter-spacing: -0.045em; white-space: nowrap; }
 .wordmark em { font-style: normal; font-weight: 300; }
-.menu { display: flex; align-items: center; gap: clamp(28px, 3.6vw, 52px); }
+.hdr-right { display: flex; align-items: center; gap: clamp(16px, 2.6vw, 36px); }
+.menu { display: flex; align-items: center; gap: clamp(22px, 2.8vw, 44px); }
 .menu a { position: relative; font-family: var(--latin); font-size: 14px; font-weight: 700; letter-spacing: .02em; padding-block: 6px; }
 .menu a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--fg); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
 .menu a:hover::after { transform: scaleX(1); }
@@ -64,7 +77,18 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
 .burger[aria-expanded="true"] span:last-child { transform: translateY(-4px) rotate(-45deg); }
 .mmenu { display: flex; flex-direction: column; padding-block: 8px 24px; border-top: 1px solid var(--line); background: var(--bg); }
 .mmenu a { padding: 10px 0; font-family: var(--latin); font-weight: 700; font-size: 26px; letter-spacing: -0.03em; }
-@media (max-width: 880px) { .menu { display: none; } .burger { display: flex; } }
+/* 언어 선택: KO · EN · JA */
+.lang { display: flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; }
+.lang a { min-width: 34px; padding: 5px 8px; border-radius: 999px; text-align: center; font-family: var(--latin); font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--mute); transition: background .2s, color .2s; }
+.lang a:hover { color: var(--fg); }
+.lang a[aria-current="true"] { background: var(--fg); color: var(--bg); }
+@media (max-width: 1080px) { .menu { display: none; } .burger { display: flex; } .hdr-right { gap: 8px; } }
+@media (max-width: 400px) { .wrap { padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); } }
+@media (max-width: 360px) {
+  .lang { padding: 2px; } .lang a { min-width: 28px; padding: 4px 5px; font-size: 11px; }
+  .logo-mark { width: 32px; height: 29px; } .wordmark { font-size: 17px; } .logo { gap: 7px; }
+  .burger { width: 36px; }
+}
 
 /* ── 히어로: 스크롤로 흐르는 가로 갤러리 ── */
 /* 세로 스크롤(휠) 거리만큼 카드 줄이 가로로 이동하고, 카드 안 그림은 반대로 살짝 밀려 패럴랙스가 생깁니다 */
@@ -116,6 +140,7 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
 @media (max-width: 700px) {
   :root { --hdr: 64px; }
   .hint, .hero-word { display: none; }
+  .card-cap b { font-size: 16px; }
   .hero-bar { grid-template-columns: 1fr auto; }
   .progress { grid-column: 1 / -1; grid-row: 2; }
   .hb-title { display: none; }
@@ -131,6 +156,7 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
   .card-frame { height: calc(100svh - var(--hdr) - 150px); }
   .card-cap { margin-bottom: 8px; }
   .card-cap span { display: none; }
+  .card-cap b { font-size: 13px; }
   .hero-bar { padding-bottom: 12px; }
   .hb-ctrl button { width: 40px; height: 40px; }
 }
@@ -146,40 +172,40 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
 @keyframes flow { to { transform: translateX(-50%); } }
 
 /* ── ABOUT ── */
-.about { display: grid; grid-template-columns: 220px 1fr; gap: clamp(32px, 5vw, 80px); }
-@media (max-width: 860px) { .about { grid-template-columns: 1fr; } }
-.statement { font-size: clamp(34px, 5vw, 68px); font-weight: 800; line-height: 1.22; letter-spacing: -0.05em; }
+.statement { font-size: clamp(30px, 4.8vw, 66px); font-weight: 800; line-height: 1.22; letter-spacing: -0.05em; }
 .statement em { font-style: normal; color: var(--accent); }
 .about-sub { margin-top: clamp(44px, 6vw, 72px); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 80px); align-items: start; }
 @media (max-width: 760px) { .about-sub { grid-template-columns: 1fr; } }
 .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px clamp(24px, 4vw, 56px); }
-.facts dt { white-space: nowrap; }
-.facts dt { font-size: 13px; color: var(--mute); }
+.facts > div { display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
+.facts dt { font-size: 13px; line-height: 1.45; color: var(--mute); }
 .facts dd { font-family: var(--latin); font-weight: 600; font-size: clamp(36px, 4vw, 52px); line-height: 1.1; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
-.values { margin-top: clamp(80px, 9vw, 120px); display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 56px); }
+.values { margin-top: clamp(72px, 8vw, 112px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
 @media (max-width: 800px) { .values { grid-template-columns: 1fr; } }
 .values li { border-top: 2px solid var(--fg); padding-top: 20px; }
 .values small { font-family: var(--latin); font-size: 12px; font-weight: 700; color: var(--mute); }
-.values h3 { margin-top: 18px; font-size: 22px; font-weight: 800; }
+.values h3 { margin-top: 18px; font-size: clamp(19px, 1.7vw, 22px); font-weight: 800; line-height: 1.35; }
 .values p { margin-top: 10px; color: var(--mute); font-size: 15px; }
 
 /* ── BUSINESS ── */
 .biz-sec { background: var(--bg-2); }
-.sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(48px, 6vw, 80px); }
-.sec-head .title { margin-top: 14px; }
+.sec-head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: end; gap: 24px clamp(32px, 5vw, 72px); margin-bottom: clamp(48px, 6vw, 76px); }
+@media (max-width: 1000px) { .sec-head { grid-template-columns: minmax(0, 1fr); } }
 .biz { border-top: 1px solid var(--fg); }
 .biz li { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; padding-block: clamp(28px, 3.4vw, 40px); border-bottom: 1px solid #d9d9d5; }
-.biz .word { font-family: var(--latin); font-weight: 700; font-size: clamp(48px, 6.4vw, 92px); line-height: 1; letter-spacing: -0.065em; color: transparent; -webkit-text-stroke: 1.2px var(--fg); transition: color .35s; }
+.biz .word { font-family: var(--latin); font-weight: 700; font-size: clamp(44px, 5.6vw, 84px); line-height: 1; letter-spacing: -0.065em; color: transparent; -webkit-text-stroke: 1.2px var(--fg); transition: color .35s; }
 .biz li:hover .word { color: var(--fg); }
-.biz h3 { font-size: clamp(20px, 2vw, 24px); font-weight: 800; }
+.biz h3 { font-size: clamp(20px, 1.9vw, 24px); font-weight: 800; line-height: 1.35; }
 .biz p { color: var(--mute); font-size: 15px; }
 .biz .tags { margin-top: 6px; font-size: 13px; color: var(--fg); }
-@media (max-width: 860px) { .biz li { grid-template-columns: 1fr; gap: 10px; } }
+@media (max-width: 1100px) { .biz li { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } .biz li > div { grid-column: 2; } .biz .word { grid-row: span 2; } }
+@media (max-width: 640px) { .biz li { grid-template-columns: minmax(0, 1fr); gap: 10px; } .biz li > div { grid-column: auto; } .biz .word { grid-row: auto; } }
 
 /* ── PIPELINE ── */
-.flow { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
-.flow::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 1px; background: var(--line); }
-.flow li { position: relative; padding-top: 36px; }
+.flow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 40px 20px; }
+.flow li { position: relative; padding-top: 36px; min-width: 0; }
+.flow li::after { content: ""; position: absolute; left: 22px; right: -12px; top: 7px; height: 1px; background: var(--line); }
+.flow li:last-child::after { display: none; }
 .flow li::before { content: ""; position: absolute; left: 0; top: 0; width: 15px; height: 15px; border-radius: 50%; background: var(--bg); border: 2px solid var(--fg); animation: stepLit 7.2s infinite; }
 .flow li:nth-child(2)::before { animation-delay: 1.2s; }
 .flow li:nth-child(3)::before { animation-delay: 2.4s; }
@@ -192,28 +218,32 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
   22% { background: var(--bg); box-shadow: 0 0 0 0 rgba(91,75,255,0); border-color: var(--fg); }
 }
 .flow small { font-family: var(--latin); font-size: 12px; font-weight: 700; color: var(--mute); }
-.flow b { display: block; margin-top: 6px; font-size: 19px; font-weight: 800; letter-spacing: -0.03em; }
+.flow b { display: block; margin-top: 6px; font-size: clamp(17px, 1.4vw, 19px); font-weight: 800; line-height: 1.35; letter-spacing: -0.03em; }
 .flow p { margin-top: 6px; font-size: 14px; color: var(--mute); line-height: 1.6; }
-@media (max-width: 900px) {
-  .flow { grid-template-columns: 1fr; gap: 0; padding-left: 4px; }
-  .flow::before { left: 11px; right: auto; top: 8px; bottom: 8px; width: 1px; height: auto; }
-  .flow li { padding: 0 0 28px 40px; }
-  .flow li::before { left: 4px; top: 4px; }
+@media (max-width: 1200px) {
+  .flow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .flow li:nth-child(3n)::after { display: none; }
+}
+@media (max-width: 640px) {
+  .flow { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .flow li { padding: 0 0 30px 40px; }
+  .flow li::before { left: 0; top: 4px; }
+  .flow li::after, .flow li:nth-child(3n)::after { display: block; left: 7px; right: auto; top: 22px; bottom: 0; width: 1px; height: auto; }
+  .flow li:last-child::after { display: none; }
 }
 
 /* ── CONTACT ── */
 .contact-sec { border-top: 1px solid var(--line); }
-.contact { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(48px, 7vw, 110px); }
-@media (max-width: 900px) { .contact { grid-template-columns: 1fr; } }
-.contact .title { margin-top: 14px; }
+.contact { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(48px, 6vw, 96px); }
+@media (max-width: 1000px) { .contact { grid-template-columns: minmax(0, 1fr); } }
 .mail-big { display: inline-block; margin-top: 36px; font-family: var(--latin); font-weight: 600; font-size: clamp(22px, 2.6vw, 32px); letter-spacing: -0.03em; border-bottom: 2px solid var(--fg); overflow-wrap: anywhere; }
 .info { margin-top: 36px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
-.info > div { display: grid; grid-template-columns: 70px 1fr; gap: 16px; }
+.info > div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 16px; }
 .info dt { color: var(--mute); }
 .info dd { min-width: 0; overflow-wrap: anywhere; }
 .form { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .types { display: flex; flex-wrap: wrap; gap: 6px; border: 0; padding: 0; margin: 0 0 18px; }
-.types button { border: 1.5px solid var(--line); background: var(--bg); color: var(--mute); border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: .2s; }
+.types button { white-space: nowrap; border: 1.5px solid var(--line); background: var(--bg); color: var(--mute); border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: .2s; }
 .types button[aria-pressed="true"] { border-color: var(--fg); background: var(--fg); color: var(--bg); }
 .field { width: 100%; border: 0; border-bottom: 1.5px solid var(--line); background: transparent; padding: 16px 0; font: inherit; font-size: 16px; color: var(--fg); resize: none; border-radius: 0; transition: border-color .2s; }
 .field::placeholder { color: #a9a9af; }
@@ -229,6 +259,7 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
 .foot-links { display: flex; flex-wrap: wrap; gap: 26px; font-size: 14px; font-weight: 600; color: var(--fg); }
 .foot-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .foot-info { padding-top: 22px; display: flex; flex-wrap: wrap; gap: 4px 18px; line-height: 1.8; }
+.foot-info span { min-width: 0; overflow-wrap: anywhere; }
 .foot-info b { font-weight: 500; color: var(--fg); margin-right: 6px; }
 .copy { margin-top: 14px; }
 
@@ -236,142 +267,843 @@ h1, h2, h3 { letter-spacing: -0.035em; text-wrap: balance; }
   html { scroll-behavior: auto; }
   .logos-track, .flow li::before { animation: none; }
 }
+html:lang(ja) { --font-noto: "Noto Sans JP"; }
 </style>
-<header class="hdr" id="hdr">
-  <div class="wrap">
-    <div class="hdr-in">
-      <a href="#top" class="logo"><svg class="logo-mark" viewBox="0 0 40 36" aria-hidden="true"><path d="M20 3C29.4 3 37 9.3 37 17s-7.6 14-17 14c-2.4 0-4.7-.4-6.7-1.2L5.5 33l2.7-6.5C5 24 3 20.7 3 17 3 9.3 10.6 3 20 3Z"/><text x="20" y="22.5" text-anchor="middle">J</text></svg><span class="wordmark">J <em>Pictures</em></span></a>
-      <nav class="menu" aria-label="주 메뉴"><a href="#about">ABOUT</a><a href="#ips">OUR IPs</a><a href="#business">BUSINESS</a><a href="#pipeline">PIPELINE</a><a href="#contact">CONTACT</a></nav>
-      <button class="burger" id="burger" aria-label="메뉴" aria-expanded="false"><span></span><span></span></button>
-    </div>
-  </div>
-  <nav class="mmenu wrap" id="mmenu" hidden><a href="#about">ABOUT</a><a href="#ips">OUR IPs</a><a href="#business">BUSINESS</a><a href="#pipeline">PIPELINE</a><a href="#contact">CONTACT</a></nav>
-</header>
-
-<main id="top">
-  <section class="hero" id="ips" aria-label="J Pictures 오리지널 IP">
-    <div class="hero-sticky">
-      <p class="hero-word" id="word" aria-hidden="true"></p>
-      <div class="track-wrap" id="twrap"><div class="floor" id="floor" aria-hidden="true"></div><div class="track" id="track"><div class="card"><div class="card-cap"><b>개같은 여과장이야</b><span>오피스 드라마</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">01</span><div class="card-inner" style="background-image:url(works/01.jpg);background-position:50% 0%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">01</span><div class="card-inner" style="background-image:url(works/01.jpg);background-position:50% 0%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>밤의 계약</b><span>로맨스</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">02</span><div class="card-inner" style="background-image:url(works/02.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">02</span><div class="card-inner" style="background-image:url(works/02.jpg);background-position:50% 25%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>열대야</b><span>로맨스 코미디</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">03</span><div class="card-inner" style="background-image:url(works/03.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">03</span><div class="card-inner" style="background-image:url(works/03.jpg);background-position:50% 25%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>붉은 서재</b><span>미스터리</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">04</span><div class="card-inner" style="background-image:url(works/04.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">04</span><div class="card-inner" style="background-image:url(works/04.jpg);background-position:50% 25%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>블랙 베일</b><span>드라마</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">05</span><div class="card-inner" style="background-image:url(works/05.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">05</span><div class="card-inner" style="background-image:url(works/05.jpg);background-position:50% 25%"></div></div></div></div></div><div class="card"><div class="card-cap"><b>유리 정원</b><span>로맨스</span></div><div class="card-stand"><div class="card-frame"><span class="card-tag">06</span><div class="card-inner" style="background-image:url(works/06.jpg);background-position:50% 25%"></div></div><div class="mirror" aria-hidden="true"><div class="card-frame"><span class="card-tag">06</span><div class="card-inner" style="background-image:url(works/06.jpg);background-position:50% 25%"></div></div></div></div></div></div></div>
-      <p class="hint" id="hint" aria-hidden="true">SCROLL ↓</p>
-      <div class="wrap hero-bar">
-        <p class="hb-idx" aria-live="polite"><b id="idx">01</b> / 06<span class="hb-title" id="hbT"></span></p>
-        <div class="progress"><i id="bar"></i></div>
-        <div class="hb-ctrl"><button id="prev" aria-label="이전 작품">←</button><button id="next" aria-label="다음 작품">→</button></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="logos" aria-hidden="true"><div class="logos-track"><span class="logo-item"><b>밤의 계약</b><span>The Night Contract</span></span><span class="logo-item"><b>붉은 서재</b><span>Scarlet Library</span></span><span class="logo-item"><b>열대야</b><span>Tropical Night</span></span><span class="logo-item"><b>블랙 베일</b><span>Black Veil</span></span><span class="logo-item"><b>유리 정원</b><span>Glass Garden</span></span><span class="logo-item"><b>오후 세 시</b><span>3 PM</span></span><span class="logo-item"><b>밤의 계약</b><span>The Night Contract</span></span><span class="logo-item"><b>붉은 서재</b><span>Scarlet Library</span></span><span class="logo-item"><b>열대야</b><span>Tropical Night</span></span><span class="logo-item"><b>블랙 베일</b><span>Black Veil</span></span><span class="logo-item"><b>유리 정원</b><span>Glass Garden</span></span><span class="logo-item"><b>오후 세 시</b><span>3 PM</span></span><span class="logo-item"><b>밤의 계약</b><span>The Night Contract</span></span><span class="logo-item"><b>붉은 서재</b><span>Scarlet Library</span></span><span class="logo-item"><b>열대야</b><span>Tropical Night</span></span><span class="logo-item"><b>블랙 베일</b><span>Black Veil</span></span><span class="logo-item"><b>유리 정원</b><span>Glass Garden</span></span><span class="logo-item"><b>오후 세 시</b><span>3 PM</span></span></div></div>
-
-  <section class="sec" id="about">
-    <div class="wrap">
-      <div class="about">
-        <p class="label">About</p>
-        <div>
-          <h2 class="statement">그림은 <em>AI가 빠르게</em>,<br>이야기와 연출은 <em>사람이 끝까지</em>.</h2>
-          <div class="about-sub">
-            <p class="lead">J Pictures는 2026년 설립된 AI 웹툰 제작사입니다. AI 이미지 생성 기반의 제작 공정으로 오리지널 IP를 기획하고 만들어 국내외 플랫폼에 선보입니다.</p>
-            <dl class="facts"><div><dt>설립</dt><dd>2026</dd></div><div><dt>개발 중인 오리지널 IP</dt><dd>6</dd></div><div><dt>AI 제작 공정 단계</dt><dd>6</dd></div><div><dt>사업 분야</dt><dd>4</dd></div></dl>
-          </div>
-          <ul class="values"><li><small>01</small><h3>이야기 중심</h3><p>기술은 도구일 뿐, 독자를 붙잡는 건 이야기입니다. 시즌 단위로 서사를 먼저 설계합니다.</p></li><li><small>02</small><h3>AI 제작 파이프라인</h3><p>AI 이미지 생성과 자체 워크플로로 기획에서 원고까지의 시간을 크게 줄입니다.</p></li><li><small>03</small><h3>일관된 퀄리티</h3><p>캐릭터 시트와 스타일 가이드로 화마다 같은 얼굴, 같은 톤을 유지하고 최종 컷은 직접 보정합니다.</p></li></ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec biz-sec" id="business">
-    <div class="wrap">
-      <div class="sec-head"><div><p class="label">Business</p><h2 class="title">기획부터 유통까지</h2></div><p class="lead">하나의 IP가 태어나 독자를 만나기까지, 모든 과정을 J Pictures가 직접 합니다.</p></div>
-      <ul class="biz"><li><span class="word">Plan</span><h3>오리지널 IP 기획</h3><div><p>세계관과 캐릭터, 시즌 구성까지 오리지널 웹툰 IP를 자체 기획합니다.</p><p class="tags">장르 리서치 · 시놉시스 · 캐릭터 설계</p></div></li><li><span class="word">Create</span><h3>AI 웹툰 제작</h3><div><p>AI 이미지 생성 기반의 제작 공정으로 연재 원고를 빠르고 안정적으로 만듭니다.</p><p class="tags">이미지 생성 · 리터칭 · 연출 편집 · 식자</p></div></li><li><span class="word">Design</span><h3>비주얼 개발</h3><div><p>캐릭터 시트, 배경 콘셉트, 작품별 스타일 가이드를 구축합니다.</p><p class="tags">캐릭터 시트 · 스타일 가이드 · 배경 콘셉트</p></div></li><li><span class="word">Launch</span><h3>유통 · 해외 진출</h3><div><p>국내 플랫폼 연재와 해외 현지화·유통을 진행합니다.</p><p class="tags">플랫폼 런칭 · 현지화 · AI 활용 표기 준수</p></div></li></ul>
-    </div>
-  </section>
-
-  <section class="sec" id="pipeline">
-    <div class="wrap">
-      <div class="sec-head"><div><p class="label">AI Pipeline</p><h2 class="title">AI로 그리고, 감각으로 완성합니다</h2></div><p class="lead">생성된 컷은 그대로 쓰지 않습니다. 연출과 디테일을 직접 다듬어 작품의 톤을 지킵니다.</p></div>
-      <ol class="flow"><li><small>STEP 01</small><b>기획</b><p>시놉시스, 회차 구성, 캐릭터 설정</p></li><li><small>STEP 02</small><b>콘티 · 프롬프트</b><p>컷 구성과 연출을 생성용 설계로 변환</p></li><li><small>STEP 03</small><b>AI 이미지 생성</b><p>캐릭터 일관성을 유지하며 컷 생성</p></li><li><small>STEP 04</small><b>리터칭 · 보정</b><p>표정·손·디테일을 사람이 직접 다듬기</p></li><li><small>STEP 05</small><b>편집 · 식자</b><p>말풍선, 효과음, 세로 스크롤 연출</p></li><li><small>STEP 06</small><b>검수 · 연재</b><p>품질·등급 검수 후 플랫폼 런칭</p></li></ol>
-    </div>
-  </section>
-
-  <section class="sec contact-sec" id="contact">
-    <div class="wrap contact">
-      <div>
-        <p class="label">Contact</p>
-        <h2 class="title">다음 IP를<br>함께 만들어요</h2>
-        <p class="mail-big">contact@jpictures.kr</p>
-        <dl class="info"><div><dt>전화</dt><dd>02-000-0000</dd></div><div><dt>주소</dt><dd>서울특별시 마포구 월드컵북로 00, 0층</dd></div></dl>
-      </div>
-      <form class="form" id="form" novalidate>
-        <fieldset class="types" id="types"><legend class="sr">문의 유형</legend></fieldset>
-        <input class="field" id="f-name" placeholder="이름 / 회사명">
-        <input class="field" id="f-email" type="email" placeholder="이메일">
-        <textarea class="field" id="f-msg" rows="4" placeholder="문의 내용"></textarea>
-        <button type="submit" class="submit">문의 보내기 →</button>
-        <p class="form-note" id="note" hidden></p>
-      </form>
-    </div>
-  </section>
-</main>
-
-<footer class="foot">
-  <div class="wrap">
-    <div class="foot-top">
-      <a href="#top" class="logo"><svg class="logo-mark" viewBox="0 0 40 36" aria-hidden="true"><path d="M20 3C29.4 3 37 9.3 37 17s-7.6 14-17 14c-2.4 0-4.7-.4-6.7-1.2L5.5 33l2.7-6.5C5 24 3 20.7 3 17 3 9.3 10.6 3 20 3Z"/><text x="20" y="22.5" text-anchor="middle">J</text></svg><span class="wordmark">J <em>Pictures</em></span></a>
-      <nav class="foot-links" aria-label="하단 메뉴"><a href="#contact">찾아오시는 길</a><a href="#top">개인정보 처리방침</a></nav>
-    </div>
-    <div class="foot-info"><span><b>제이픽처스</b></span><span><b>대표자명</b>홍길동</span><span><b>사업자등록번호</b>000-00-00000</span><span><b>주소</b>서울특별시 마포구 월드컵북로 00, 0층</span><span><b>대표전화</b>02-000-0000</span><span><b>이메일</b>contact@jpictures.kr</span></div>
-    <p class="copy">Copyright J Pictures. All rights reserved.</p>
-  </div>
-</footer>
-
-<script>
-(function(){
-  var W=[{"t": "개같은 여과장이야", "e": "Office Queen", "g": "오피스 드라마", "s": "제작중"}, {"t": "밤의 계약", "e": "The Night Contract", "g": "로맨스", "s": "제작중"}, {"t": "열대야", "e": "Tropical Night", "g": "로맨스 코미디", "s": "기획중"}, {"t": "붉은 서재", "e": "Scarlet Library", "g": "미스터리", "s": "기획중"}, {"t": "블랙 베일", "e": "Black Veil", "g": "드라마", "s": "기획중"}, {"t": "유리 정원", "e": "Glass Garden", "g": "로맨스", "s": "공개예정"}];
-  var hdr=document.getElementById("hdr"),burger=document.getElementById("burger"),mm=document.getElementById("mmenu");
-  function solid(){hdr.classList.toggle("is-solid",window.scrollY>10||!mm.hidden)}
-  window.addEventListener("scroll",solid,{passive:true});solid();
-  burger.addEventListener("click",function(){var o=mm.hidden;mm.hidden=!o;burger.setAttribute("aria-expanded",String(o));solid()});
-  mm.addEventListener("click",function(e){if(e.target.tagName==="A"){mm.hidden=true;burger.setAttribute("aria-expanded","false");solid()}});
-
-  var sec=document.getElementById("ips"),track=document.getElementById("track");
-  var cards=[].slice.call(track.querySelectorAll(".card")),inners=cards.map(function(c){return [].slice.call(c.querySelectorAll(".card-inner"))});
-  var n=cards.length,max=0,cur=0,target=0,last=-1;
-  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function pad(v){return ("0"+v).slice(-2)}
-  function measure(){max=Math.max(0,track.scrollWidth-window.innerWidth);sec.style.height=(window.innerHeight+max)+"px";var st=cards[0].querySelector(".card-stand");document.getElementById("floor").style.top=(st.getBoundingClientRect().bottom-document.getElementById("twrap").getBoundingClientRect().top)+"px";onScroll()}
-  function onScroll(){var top=sec.getBoundingClientRect().top;target=Math.min(max,Math.max(0,-top))}
-  function setActive(i){var w=W[i];document.getElementById("word").textContent=w.e;document.getElementById("idx").textContent=pad(i+1);document.getElementById("hbT").textContent=w.t}
-  function tick(){
-    cur+=(target-cur)*(reduce?1:0.085); if(Math.abs(target-cur)<0.05)cur=target;
-    track.style.transform="translate3d("+(-cur)+"px,0,0)";
-    var vw=window.innerWidth,best=0,bestD=1e9;
-    cards.forEach(function(c,i){
-      var d=(c.offsetLeft+c.offsetWidth/2-cur-vw/2)/vw;
-      if(Math.abs(d)<bestD){bestD=Math.abs(d);best=i}
-      if(!reduce){var sh=Math.max(-1,Math.min(1,d))*c.offsetWidth*0.12;inners[i].forEach(function(el){el.style.transform="translate3d("+sh+"px,0,0)"})}
-    });
-    if(best!==last){last=best;setActive(best)}
-    document.getElementById("bar").style.transform="scaleX("+(max?cur/max:0)+")";
-    document.getElementById("hint").style.opacity=cur>40?"0":"1";
-    requestAnimationFrame(tick);
+<div id="app"></div>
+<script>window.JP_CONTENT =
+{
+  "company": {
+    "email": "khaos1004@naver.com",
+    "tel": "010-7794-6488"
+  },
+  "facts": [
+    "2026",
+    "6",
+    "6",
+    "4"
+  ],
+  "serviceWords": [
+    "Plan",
+    "Create",
+    "Design",
+    "Launch"
+  ],
+  "works": [
+    {
+      "id": "01",
+      "en": "Office Queen",
+      "genre": "office",
+      "status": "production",
+      "image": "/works/01.jpg",
+      "focus": "50% 0%",
+      "colors": [
+        "#2a2a33",
+        "#0b0b10"
+      ]
+    },
+    {
+      "id": "02",
+      "en": "The Night Contract",
+      "genre": "romance",
+      "status": "production",
+      "image": "/works/02.jpg",
+      "focus": "50% 25%",
+      "colors": [
+        "#3a2f8f",
+        "#0d0b26"
+      ]
+    },
+    {
+      "id": "03",
+      "en": "Tropical Night",
+      "genre": "romcom",
+      "status": "planning",
+      "image": "/works/03.jpg",
+      "focus": "50% 25%",
+      "colors": [
+        "#1f8a75",
+        "#06201b"
+      ]
+    },
+    {
+      "id": "04",
+      "en": "Scarlet Library",
+      "genre": "mystery",
+      "status": "planning",
+      "image": "/works/04.jpg",
+      "focus": "50% 25%",
+      "colors": [
+        "#a8324a",
+        "#1c0710"
+      ]
+    },
+    {
+      "id": "05",
+      "en": "Black Veil",
+      "genre": "drama",
+      "status": "planning",
+      "image": "/works/05.jpg",
+      "focus": "50% 25%",
+      "colors": [
+        "#4b4b5a",
+        "#0b0b10"
+      ]
+    },
+    {
+      "id": "06",
+      "en": "Glass Garden",
+      "genre": "romance",
+      "status": "soon",
+      "image": "/works/06.jpg",
+      "focus": "50% 25%",
+      "colors": [
+        "#c27a2c",
+        "#221304"
+      ]
+    }
+  ],
+  "locales": {
+    "ko": {
+      "langName": "한국어",
+      "short": "KO",
+      "meta": {
+        "title": "J Pictures | 제이픽처스 — AI 웹툰 스튜디오",
+        "description": "J Pictures(제이픽처스)는 AI 이미지 생성 기반으로 오리지널 웹툰 IP를 기획·제작·유통하는 웹툰 제작사입니다."
+      },
+      "nav": {
+        "about": "ABOUT",
+        "ips": "OUR IPs",
+        "business": "BUSINESS",
+        "pipeline": "PIPELINE",
+        "contact": "CONTACT"
+      },
+      "ui": {
+        "menu": "메뉴",
+        "language": "언어 선택",
+        "carousel": "J Pictures 오리지널 IP",
+        "prev": "이전 작품",
+        "next": "다음 작품",
+        "scroll": "SCROLL ↓"
+      },
+      "status": {
+        "planning": "기획중",
+        "production": "제작중",
+        "soon": "공개예정"
+      },
+      "genres": {
+        "office": "오피스 드라마",
+        "romance": "로맨스",
+        "romcom": "로맨스 코미디",
+        "mystery": "미스터리",
+        "drama": "드라마"
+      },
+      "titles": {
+        "01": "개같은 여과장이야",
+        "02": "밤의 계약",
+        "03": "열대야",
+        "04": "붉은 서재",
+        "05": "블랙 베일",
+        "06": "유리 정원"
+      },
+      "company": {
+        "name": "제이픽처스 (J Pictures)",
+        "hours": "오전 6시 ~ 오후 11시"
+      },
+      "about": {
+        "label": "About",
+        "statement": "그림은 *AI가 빠르게*,\n이야기와 연출은 *사람이 끝까지*.",
+        "lead": "J Pictures는 2026년 설립된 AI 웹툰 제작사입니다. AI 이미지 생성 기반의 제작 공정으로 오리지널 IP를 기획하고 만들어 국내외 플랫폼에 선보입니다.",
+        "facts": [
+          "설립",
+          "개발 중인 오리지널 IP",
+          "AI 제작 공정 단계",
+          "사업 분야"
+        ],
+        "values": [
+          {
+            "title": "이야기 중심",
+            "desc": "기술은 도구일 뿐, 독자를 붙잡는 건 이야기입니다. 시즌 단위로 서사를 먼저 설계합니다."
+          },
+          {
+            "title": "AI 제작 파이프라인",
+            "desc": "AI 이미지 생성과 자체 워크플로로 기획에서 원고까지의 시간을 크게 줄입니다."
+          },
+          {
+            "title": "일관된 퀄리티",
+            "desc": "캐릭터 시트와 스타일 가이드로 화마다 같은 얼굴, 같은 톤을 유지하고 최종 컷은 직접 보정합니다."
+          }
+        ]
+      },
+      "business": {
+        "label": "Business",
+        "title": "기획부터 유통까지",
+        "lead": "하나의 IP가 태어나 독자를 만나기까지, 모든 과정을 J Pictures가 직접 합니다.",
+        "items": [
+          {
+            "title": "오리지널 IP 기획",
+            "desc": "세계관과 캐릭터, 시즌 구성까지 오리지널 웹툰 IP를 자체 기획합니다.",
+            "tags": [
+              "장르 리서치",
+              "시놉시스",
+              "캐릭터 설계"
+            ]
+          },
+          {
+            "title": "AI 웹툰 제작",
+            "desc": "AI 이미지 생성 기반의 제작 공정으로 연재 원고를 빠르고 안정적으로 만듭니다.",
+            "tags": [
+              "이미지 생성",
+              "리터칭",
+              "연출 편집",
+              "식자"
+            ]
+          },
+          {
+            "title": "비주얼 개발",
+            "desc": "캐릭터 시트, 배경 콘셉트, 작품별 스타일 가이드를 구축합니다.",
+            "tags": [
+              "캐릭터 시트",
+              "스타일 가이드",
+              "배경 콘셉트"
+            ]
+          },
+          {
+            "title": "유통 · 해외 진출",
+            "desc": "국내 플랫폼 연재와 해외 현지화·유통을 진행합니다.",
+            "tags": [
+              "플랫폼 런칭",
+              "현지화",
+              "AI 활용 표기 준수"
+            ]
+          }
+        ]
+      },
+      "pipeline": {
+        "label": "AI Pipeline",
+        "title": "AI로 그리고,\n감각으로 완성합니다",
+        "lead": "생성된 컷은 그대로 쓰지 않습니다. 연출과 디테일을 직접 다듬어 작품의 톤을 지킵니다.",
+        "steps": [
+          {
+            "title": "기획",
+            "desc": "시놉시스, 회차 구성, 캐릭터 설정"
+          },
+          {
+            "title": "콘티 · 프롬프트",
+            "desc": "컷 구성과 연출을 생성용 설계로 변환"
+          },
+          {
+            "title": "AI 이미지 생성",
+            "desc": "캐릭터 일관성을 유지하며 컷 생성"
+          },
+          {
+            "title": "리터칭 · 보정",
+            "desc": "표정·손·디테일을 사람이 직접 다듬기"
+          },
+          {
+            "title": "편집 · 식자",
+            "desc": "말풍선, 효과음, 세로 스크롤 연출"
+          },
+          {
+            "title": "검수 · 연재",
+            "desc": "품질·등급 검수 후 플랫폼 런칭"
+          }
+        ]
+      },
+      "contact": {
+        "label": "Contact",
+        "title": "다음 IP를\n함께 만들어요",
+        "tel": "전화",
+        "legend": "문의 유형",
+        "types": [
+          "작품 제휴",
+          "IP 라이선스",
+          "협업 제안",
+          "기타"
+        ],
+        "name": "이름 / 회사명",
+        "email": "이메일",
+        "message": "문의 내용",
+        "submit": "문의 보내기",
+        "missing": "이름, 이메일, 문의 내용을 모두 입력해 주세요.",
+        "demo": "데모 페이지라 실제로 전송되지는 않습니다. 실제 사이트에서는 메일 작성 창으로 연결됩니다.",
+        "hours": "응대 시간",
+        "mail": "이메일"
+      },
+      "footer": {
+        "company": "상호",
+        "email": "이메일",
+        "tel": "전화",
+        "rights": "All rights reserved."
+      }
+    },
+    "en": {
+      "langName": "English",
+      "short": "EN",
+      "meta": {
+        "title": "J Pictures — AI Webtoon Studio",
+        "description": "J Pictures is a webtoon studio that plans, produces and distributes original webtoon IP with an AI image-generation pipeline."
+      },
+      "nav": {
+        "about": "ABOUT",
+        "ips": "OUR IPs",
+        "business": "BUSINESS",
+        "pipeline": "PIPELINE",
+        "contact": "CONTACT"
+      },
+      "ui": {
+        "menu": "Menu",
+        "language": "Choose language",
+        "carousel": "J Pictures original IP",
+        "prev": "Previous title",
+        "next": "Next title",
+        "scroll": "SCROLL ↓"
+      },
+      "status": {
+        "planning": "In development",
+        "production": "In production",
+        "soon": "Coming soon"
+      },
+      "genres": {
+        "office": "Office drama",
+        "romance": "Romance",
+        "romcom": "Romantic comedy",
+        "mystery": "Mystery",
+        "drama": "Drama"
+      },
+      "titles": {
+        "01": "Office Queen",
+        "02": "The Night Contract",
+        "03": "Tropical Night",
+        "04": "Scarlet Library",
+        "05": "Black Veil",
+        "06": "Glass Garden"
+      },
+      "company": {
+        "name": "J Pictures (제이픽처스)",
+        "hours": "6 AM – 11 PM (KST)"
+      },
+      "about": {
+        "label": "About",
+        "statement": "*AI* draws it fast.\n*People* see the story through.",
+        "lead": "Founded in 2026, J Pictures is an AI webtoon studio. We plan and produce original IP through an AI image-generation pipeline and launch it on platforms in Korea and abroad.",
+        "facts": [
+          "Founded",
+          "Original IPs in development",
+          "Steps in our AI pipeline",
+          "Business areas"
+        ],
+        "values": [
+          {
+            "title": "Story first",
+            "desc": "Technology is only a tool; the story is what keeps readers. We design each season's narrative before anything else."
+          },
+          {
+            "title": "AI production pipeline",
+            "desc": "AI image generation and our own workflow cut the time from concept to finished episode."
+          },
+          {
+            "title": "Consistent quality",
+            "desc": "Character sheets and style guides keep the same faces and tone in every episode, and every final panel is retouched by hand."
+          }
+        ]
+      },
+      "business": {
+        "label": "Business",
+        "title": "From concept to distribution",
+        "lead": "From the moment an IP is born to the moment it meets readers, J Pictures handles every step itself.",
+        "items": [
+          {
+            "title": "Original IP development",
+            "desc": "We develop original webtoon IP in-house, from world and characters to season structure.",
+            "tags": [
+              "Genre research",
+              "Synopsis",
+              "Character design"
+            ]
+          },
+          {
+            "title": "AI webtoon production",
+            "desc": "An AI image-generation workflow lets us produce series episodes quickly and reliably.",
+            "tags": [
+              "Image generation",
+              "Retouching",
+              "Direction & editing",
+              "Lettering"
+            ]
+          },
+          {
+            "title": "Visual development",
+            "desc": "We build character sheets, background concepts and a style guide for every title.",
+            "tags": [
+              "Character sheets",
+              "Style guides",
+              "Background concepts"
+            ]
+          },
+          {
+            "title": "Distribution & global",
+            "desc": "We launch on Korean platforms and handle localization and distribution overseas.",
+            "tags": [
+              "Platform launch",
+              "Localization",
+              "AI-use disclosure"
+            ]
+          }
+        ]
+      },
+      "pipeline": {
+        "label": "AI Pipeline",
+        "title": "Drawn with AI,\nfinished with taste",
+        "lead": "We never publish generated panels as they are. We refine direction and detail by hand to keep each title's tone.",
+        "steps": [
+          {
+            "title": "Planning",
+            "desc": "Synopsis, episode plan and characters"
+          },
+          {
+            "title": "Storyboard & prompts",
+            "desc": "Panels and direction turned into generation specs"
+          },
+          {
+            "title": "AI image generation",
+            "desc": "Panels generated with consistent characters"
+          },
+          {
+            "title": "Retouching",
+            "desc": "Expressions, hands and details fixed by hand"
+          },
+          {
+            "title": "Editing & lettering",
+            "desc": "Speech bubbles, SFX and vertical-scroll pacing"
+          },
+          {
+            "title": "Review & launch",
+            "desc": "Quality and rating review, then platform launch"
+          }
+        ]
+      },
+      "contact": {
+        "label": "Contact",
+        "title": "Let's build\nthe next IP together",
+        "tel": "Phone",
+        "legend": "Inquiry type",
+        "types": [
+          "Partnership",
+          "IP licensing",
+          "Collaboration",
+          "Other"
+        ],
+        "name": "Name / Company",
+        "email": "Email",
+        "message": "Message",
+        "submit": "Send",
+        "missing": "Please fill in your name, email and message.",
+        "demo": "This is a demo, so nothing is sent. On the live site, this opens your email app with the message filled in.",
+        "hours": "Hours",
+        "mail": "Email"
+      },
+      "footer": {
+        "company": "Company",
+        "email": "Email",
+        "tel": "Phone",
+        "rights": "All rights reserved."
+      }
+    },
+    "ja": {
+      "langName": "日本語",
+      "short": "JA",
+      "meta": {
+        "title": "J Pictures — AIウェブトゥーンスタジオ",
+        "description": "J Picturesは、AI画像生成をベースにオリジナルウェブトゥーンIPを企画・制作・展開するウェブトゥーン制作会社です。"
+      },
+      "nav": {
+        "about": "ABOUT",
+        "ips": "OUR IPs",
+        "business": "BUSINESS",
+        "pipeline": "PIPELINE",
+        "contact": "CONTACT"
+      },
+      "ui": {
+        "menu": "メニュー",
+        "language": "言語を選択",
+        "carousel": "J Pictures オリジナルIP",
+        "prev": "前の作品",
+        "next": "次の作品",
+        "scroll": "SCROLL ↓"
+      },
+      "status": {
+        "planning": "企画中",
+        "production": "制作中",
+        "soon": "公開予定"
+      },
+      "genres": {
+        "office": "オフィスドラマ",
+        "romance": "ロマンス",
+        "romcom": "ラブコメ",
+        "mystery": "ミステリー",
+        "drama": "ドラマ"
+      },
+      "titles": {
+        "01": "最悪の女課長",
+        "02": "夜の契約",
+        "03": "熱帯夜",
+        "04": "緋色の書斎",
+        "05": "ブラックヴェール",
+        "06": "ガラスの庭園"
+      },
+      "company": {
+        "name": "ジェイピクチャーズ (J Pictures)",
+        "hours": "午前6時〜午後11時（韓国時間）"
+      },
+      "about": {
+        "label": "About",
+        "statement": "絵は*AIが速く*、\n物語と演出は*人が最後まで*。",
+        "lead": "J Picturesは2026年に設立されたAIウェブトゥーン制作会社です。AI画像生成をベースにした制作工程でオリジナルIPを企画・制作し、国内外のプラットフォームで展開します。",
+        "facts": [
+          "設立",
+          "開発中のオリジナルIP",
+          "AI制作工程",
+          "事業分野"
+        ],
+        "values": [
+          {
+            "title": "ストーリー中心",
+            "desc": "技術は道具にすぎません。読者をつかむのは物語です。まずシーズン単位で物語を設計します。"
+          },
+          {
+            "title": "AI制作パイプライン",
+            "desc": "AI画像生成と独自のワークフローで、企画から原稿完成までの時間を大幅に短縮します。"
+          },
+          {
+            "title": "一貫したクオリティ",
+            "desc": "キャラクターシートとスタイルガイドで毎話同じ顔・同じトーンを保ち、最終コマは手作業で仕上げます。"
+          }
+        ]
+      },
+      "business": {
+        "label": "Business",
+        "title": "企画から流通まで",
+        "lead": "ひとつのIPが生まれて読者に届くまで、すべての工程をJ Picturesが自ら手がけます。",
+        "items": [
+          {
+            "title": "オリジナルIP企画",
+            "desc": "世界観やキャラクター、シーズン構成までオリジナルウェブトゥーンIPを自社で企画します。",
+            "tags": [
+              "ジャンルリサーチ",
+              "シノプシス",
+              "キャラクター設計"
+            ]
+          },
+          {
+            "title": "AIウェブトゥーン制作",
+            "desc": "AI画像生成ベースの制作工程で、連載原稿を速く安定して制作します。",
+            "tags": [
+              "画像生成",
+              "レタッチ",
+              "演出編集",
+              "写植"
+            ]
+          },
+          {
+            "title": "ビジュアル開発",
+            "desc": "キャラクターシート、背景コンセプト、作品ごとのスタイルガイドを構築します。",
+            "tags": [
+              "キャラクターシート",
+              "スタイルガイド",
+              "背景コンセプト"
+            ]
+          },
+          {
+            "title": "流通・海外展開",
+            "desc": "国内プラットフォームでの連載と、海外向けのローカライズ・流通を行います。",
+            "tags": [
+              "プラットフォーム展開",
+              "ローカライズ",
+              "AI利用表示の遵守"
+            ]
+          }
+        ]
+      },
+      "pipeline": {
+        "label": "AI Pipeline",
+        "title": "AIで描き、\n感性で仕上げる",
+        "lead": "生成したコマをそのまま使うことはありません。演出とディテールを手で整え、作品のトーンを守ります。",
+        "steps": [
+          {
+            "title": "企画",
+            "desc": "シノプシス、話数構成、キャラクター設定"
+          },
+          {
+            "title": "コンテ・プロンプト",
+            "desc": "コマ割りと演出を生成用の設計に変換"
+          },
+          {
+            "title": "AI画像生成",
+            "desc": "キャラクターの一貫性を保ってコマを生成"
+          },
+          {
+            "title": "レタッチ・補正",
+            "desc": "表情・手・ディテールを人の手で仕上げ"
+          },
+          {
+            "title": "編集・写植",
+            "desc": "吹き出し、効果音、縦スクロール演出"
+          },
+          {
+            "title": "検収・連載",
+            "desc": "品質・レーティング検収後に公開"
+          }
+        ]
+      },
+      "contact": {
+        "label": "Contact",
+        "title": "次のIPを\n一緒に作りましょう",
+        "tel": "電話",
+        "legend": "お問い合わせ種別",
+        "types": [
+          "作品提携",
+          "IPライセンス",
+          "コラボ提案",
+          "その他"
+        ],
+        "name": "お名前 / 会社名",
+        "email": "メールアドレス",
+        "message": "お問い合わせ内容",
+        "submit": "送信する",
+        "missing": "お名前、メールアドレス、お問い合わせ内容をすべて入力してください。",
+        "demo": "デモページのため実際には送信されません。実際のサイトではメール作成画面が開きます。",
+        "hours": "対応時間",
+        "mail": "メール"
+      },
+      "footer": {
+        "company": "商号",
+        "email": "メール",
+        "tel": "電話",
+        "rights": "All rights reserved."
+      }
+    }
   }
-  function goTo(i){i=(i+n)%n;var c=cards[i];var x=c.offsetLeft+c.offsetWidth/2-window.innerWidth/2;window.scrollTo({top:sec.offsetTop+Math.max(0,x),behavior:"smooth"})}
-  document.getElementById("prev").onclick=function(){goTo(last-1)};
-  document.getElementById("next").onclick=function(){goTo(last+1)};
-  sec.addEventListener("wheel",function(e){if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){e.preventDefault();window.scrollBy(0,e.deltaX)}},{passive:false});
-  window.addEventListener("resize",measure);window.addEventListener("load",measure);
-  window.addEventListener("scroll",onScroll,{passive:true});
-  measure();requestAnimationFrame(tick);
+};</script>
+<script>
+/* J Pictures 데모 — Next.js 페이지와 같은 마크업을 lib/content.json 으로 그립니다. */
+(function () {
+  var C = window.JP_CONTENT;
+  var LANGS = ["ko", "en", "ja"];
+  var KEY = "jp-lang";
+  var root = document.getElementById("app");
+  var stopHero = null;
 
-  var types=["작품 제휴","IP 라이선스","협업 제안","기타"],curType=types[0],box=document.getElementById("types");
-  types.forEach(function(t){var b=document.createElement("button");b.type="button";b.textContent=t;b.setAttribute("aria-pressed",String(t===curType));box.appendChild(b)});
-  box.addEventListener("click",function(e){if(e.target.tagName!=="BUTTON")return;curType=e.target.textContent;box.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",String(b.textContent===curType))})});
-  document.getElementById("form").addEventListener("submit",function(e){
-    e.preventDefault();
-    var ok=["f-name","f-email","f-msg"].every(function(id){return document.getElementById(id).value.trim()});
-    var note=document.getElementById("note");note.hidden=false;
-    note.textContent=ok?"데모 페이지라 실제로 전송되지는 않습니다. 실제 사이트에서는 ["+curType+"] 문의가 contact@jpictures.kr 메일 작성 창으로 연결됩니다.":"이름, 이메일, 문의 내용을 모두 입력해 주세요.";
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function rich(s) {
+    return s
+      .split("\n")
+      .map(function (line) {
+        return line
+          .split("*")
+          .map(function (p, i) { return i % 2 ? "<em>" + esc(p) + "</em>" : esc(p); })
+          .join("");
+      })
+      .join("<br>");
+  }
+  function pad(n) { return ("0" + n).slice(-2); }
+  var LOGO =
+    '<svg class="logo-mark" viewBox="0 0 40 36" aria-hidden="true"><path d="M20 3C29.4 3 37 9.3 37 17s-7.6 14-17 14c-2.4 0-4.7-.4-6.7-1.2L5.5 33l2.7-6.5C5 24 3 20.7 3 17 3 9.3 10.6 3 20 3Z"/><text x="20" y="22.5" text-anchor="middle">J</text></svg>';
+
+  function pickLang() {
+    var h = (location.hash || "").slice(1);
+    if (LANGS.indexOf(h) >= 0) return h;
+    try {
+      var s = localStorage.getItem(KEY);
+      if (LANGS.indexOf(s) >= 0) return s;
+    } catch (e) {}
+    var n = ((navigator.languages && navigator.languages[0]) || navigator.language || "").slice(0, 2).toLowerCase();
+    return LANGS.indexOf(n) >= 0 ? n : "ko";
+  }
+
+  function works(t) {
+    return C.works.map(function (w) {
+      return { id: w.id, en: w.en, image: "works/" + w.id + ".jpg", focus: w.focus, title: t.titles[w.id], genre: t.genres[w.genre], status: t.status[w.status] };
+    });
+  }
+
+  function frame(w, i) {
+    return '<div class="card-frame"><span class="card-tag">' + pad(i + 1) + '</span><div class="card-inner" style="background-image:url(' + w.image + ");background-position:" + w.focus + '"></div></div>';
+  }
+
+  function render(lang) {
+    var t = C.locales[lang];
+    var W = works(t);
+    var co = C.company;
+    var nav = [["#about", t.nav.about], ["#ips", t.nav.ips], ["#business", t.nav.business], ["#pipeline", t.nav.pipeline], ["#contact", t.nav.contact]];
+    var navHtml = nav.map(function (n) { return '<a href="' + n[0] + '">' + esc(n[1]) + "</a>"; }).join("");
+    var langHtml = LANGS.map(function (l) {
+      var o = C.locales[l];
+      return '<a href="#' + l + '" data-lang="' + l + '" lang="' + l + '" title="' + esc(o.langName) + '"' + (l === lang ? ' aria-current="true"' : "") + ">" + o.short + "</a>";
+    }).join("");
+
+    var cards = W.map(function (w, i) {
+      return '<div class="card"><div class="card-cap"><b>' + esc(w.title) + "</b><span>" + esc(w.genre) + '</span></div><div class="card-stand">' + frame(w, i) + '<div class="mirror" aria-hidden="true">' + frame(w, i) + "</div></div></div>";
+    }).join("");
+    var strip = W.concat(W, W).map(function (w) { return '<span class="logo-item"><b>' + esc(w.title) + "</b><span>" + esc(w.en) + "</span></span>"; }).join("");
+    var facts = t.about.facts.map(function (l, i) { return "<div><dt>" + esc(l) + "</dt><dd>" + C.facts[i] + "</dd></div>"; }).join("");
+    var values = t.about.values.map(function (v, i) { return "<li><small>" + pad(i + 1) + "</small><h3>" + esc(v.title) + "</h3><p>" + esc(v.desc) + "</p></li>"; }).join("");
+    var biz = t.business.items.map(function (s, i) {
+      return '<li><span class="word" aria-hidden="true">' + C.serviceWords[i] + "</span><h3>" + esc(s.title) + "</h3><div><p>" + esc(s.desc) + '</p><p class="tags">' + s.tags.map(esc).join(" · ") + "</p></div></li>";
+    }).join("");
+    var flow = t.pipeline.steps.map(function (p, i) { return "<li><small>STEP " + pad(i + 1) + "</small><b>" + esc(p.title) + "</b><p>" + esc(p.desc) + "</p></li>"; }).join("");
+
+    root.innerHTML =
+      '<header class="hdr" id="hdr"><div class="wrap"><div class="hdr-in">' +
+      '<a href="#top" class="logo">' + LOGO + '<span class="wordmark">J <em>Pictures</em></span></a>' +
+      '<div class="hdr-right"><nav class="menu" aria-label="Main">' + navHtml + "</nav>" +
+      '<nav class="lang" aria-label="' + esc(t.ui.language) + '">' + langHtml + "</nav>" +
+      '<button class="burger" id="burger" aria-label="' + esc(t.ui.menu) + '" aria-expanded="false"><span></span><span></span></button></div>' +
+      '</div></div><nav class="mmenu wrap" id="mmenu" hidden>' + navHtml + "</nav></header>" +
+      '<main id="top">' +
+      '<section class="hero" id="ips" aria-label="' + esc(t.ui.carousel) + '"><div class="hero-sticky">' +
+      '<p class="hero-word" id="word" aria-hidden="true"></p>' +
+      '<div class="track-wrap" id="twrap"><div class="floor" id="floor" aria-hidden="true"></div><div class="track" id="track">' + cards + "</div></div>" +
+      '<p class="hint" id="hint" aria-hidden="true">' + esc(t.ui.scroll) + "</p>" +
+      '<div class="wrap hero-bar"><p class="hb-idx" aria-live="polite"><b id="idx">01</b> / ' + pad(W.length) + '<span class="hb-title" id="hbT"></span></p>' +
+      '<div class="progress"><i id="bar"></i></div>' +
+      '<div class="hb-ctrl"><button id="prev" aria-label="' + esc(t.ui.prev) + '">←</button><button id="next" aria-label="' + esc(t.ui.next) + '">→</button></div></div>' +
+      "</div></section>" +
+      '<div class="logos" aria-hidden="true"><div class="logos-track">' + strip + "</div></div>" +
+      '<section class="sec" id="about"><div class="wrap split"><p class="label">' + esc(t.about.label) + '</p><div class="split-body">' +
+      '<h2 class="statement">' + rich(t.about.statement) + "</h2>" +
+      '<div class="about-sub"><p class="lead">' + esc(t.about.lead) + '</p><dl class="facts">' + facts + "</dl></div>" +
+      '<ul class="values">' + values + "</ul></div></div></section>" +
+      '<section class="sec biz-sec" id="business"><div class="wrap split"><p class="label">' + esc(t.business.label) + '</p><div class="split-body">' +
+      '<div class="sec-head"><h2 class="title">' + esc(t.business.title) + '</h2><p class="lead">' + esc(t.business.lead) + "</p></div>" +
+      '<ul class="biz">' + biz + "</ul></div></div></section>" +
+      '<section class="sec" id="pipeline"><div class="wrap split"><p class="label">' + esc(t.pipeline.label) + '</p><div class="split-body">' +
+      '<div class="sec-head"><h2 class="title">' + rich(t.pipeline.title) + '</h2><p class="lead">' + esc(t.pipeline.lead) + "</p></div>" +
+      '<ol class="flow">' + flow + "</ol></div></div></section>" +
+      '<section class="sec contact-sec" id="contact"><div class="wrap split"><p class="label">' + esc(t.contact.label) + '</p><div class="split-body contact"><div>' +
+      '<h2 class="title">' + rich(t.contact.title) + "</h2>" +
+      '<p class="mail-big">' + esc(co.email) + "</p>" +
+      '<dl class="info"><div><dt>' + esc(t.contact.tel) + "</dt><dd>" + esc(co.tel) + "</dd></div><div><dt>" + esc(t.contact.hours) + "</dt><dd>" + esc(t.company.hours) + "</dd></div></dl></div>" +
+      '<form class="form" id="form" novalidate><fieldset class="types" id="types"><legend class="sr">' + esc(t.contact.legend) + "</legend>" +
+      t.contact.types.map(function (x, i) { return '<button type="button" aria-pressed="' + (i === 0) + '">' + esc(x) + "</button>"; }).join("") +
+      "</fieldset>" +
+      '<input class="field" id="f-name" placeholder="' + esc(t.contact.name) + '" aria-label="' + esc(t.contact.name) + '">' +
+      '<input class="field" id="f-email" type="email" placeholder="' + esc(t.contact.email) + '" aria-label="' + esc(t.contact.email) + '">' +
+      '<textarea class="field" id="f-msg" rows="4" placeholder="' + esc(t.contact.message) + '" aria-label="' + esc(t.contact.message) + '"></textarea>' +
+      '<button type="submit" class="submit">' + esc(t.contact.submit) + ' →</button><p class="form-note" id="note" hidden></p></form>' +
+      "</div></div></section></main>" +
+      '<footer class="foot"><div class="wrap"><div class="foot-top"><a href="#top" class="logo">' + LOGO + '<span class="wordmark">J <em>Pictures</em></span></a>' +
+      '<nav class="foot-links" aria-label="Footer"><a href="#about">' + esc(t.nav.about) + '</a><a href="#ips">' + esc(t.nav.ips) + '</a><a href="#business">' + esc(t.nav.business) + '</a><a href="#contact">' + esc(t.nav.contact) + "</a></nav></div>" +
+      '<div class="foot-info"><span><b>' + esc(t.footer.company) + "</b>" + esc(t.company.name) + "</span><span><b>" + esc(t.footer.email) + "</b>" + esc(co.email) + "</span><span><b>" + esc(t.footer.tel) + "</b>" + esc(co.tel) + " (" + esc(t.company.hours) + ")</span></div>" +
+      '<p class="copy">© 2026 J Pictures. ' + esc(t.footer.rights) + "</p></div></footer>";
+
+    document.documentElement.lang = lang;
+    document.title = t.meta.title;
+    bind(lang, t, W);
+  }
+
+  function bind(lang, t, W) {
+    var hdr = document.getElementById("hdr"), burger = document.getElementById("burger"), mm = document.getElementById("mmenu");
+    function solid() { hdr.classList.toggle("is-solid", window.scrollY > 10 || !mm.hidden); }
+    window.onscroll = null;
+    burger.onclick = function () { var o = mm.hidden; mm.hidden = !o; burger.setAttribute("aria-expanded", String(o)); solid(); };
+    mm.onclick = function (e) { if (e.target.tagName === "A") { mm.hidden = true; burger.setAttribute("aria-expanded", "false"); solid(); } };
+    document.querySelectorAll(".lang a").forEach(function (a) {
+      a.onclick = function (e) {
+        e.preventDefault();
+        var l = a.getAttribute("data-lang");
+        try { localStorage.setItem(KEY, l); } catch (x) {}
+        try { history.replaceState(null, "", "#" + l); } catch (x) {}
+        var y = window.scrollY;
+        render(l);
+        window.scrollTo(0, y);
+      };
+    });
+
+    /* 휠로 흐르는 갤러리 + 패럴랙스 + 거울 */
+    if (stopHero) stopHero();
+    var sec = document.getElementById("ips"), track = document.getElementById("track");
+    var cards = [].slice.call(track.querySelectorAll(".card"));
+    var inners = cards.map(function (c) { return [].slice.call(c.querySelectorAll(".card-inner")); });
+    var n = cards.length, max = 0, cur = 0, target = 0, last = -1, raf = 0, alive = true;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function measure() {
+      max = Math.max(0, track.scrollWidth - window.innerWidth);
+      sec.style.height = window.innerHeight + max + "px";
+      var st = cards[0].querySelector(".card-stand");
+      document.getElementById("floor").style.top = st.getBoundingClientRect().bottom - document.getElementById("twrap").getBoundingClientRect().top + "px";
+      onScroll();
+    }
+    function onScroll() { target = Math.min(max, Math.max(0, -sec.getBoundingClientRect().top)); solid(); }
+    function setActive(i) {
+      document.getElementById("word").textContent = W[i].en;
+      document.getElementById("idx").textContent = pad(i + 1);
+      document.getElementById("hbT").textContent = W[i].title;
+    }
+    function tick() {
+      if (!alive) return;
+      cur += (target - cur) * (reduce ? 1 : 0.085);
+      if (Math.abs(target - cur) < 0.05) cur = target;
+      track.style.transform = "translate3d(" + -cur + "px,0,0)";
+      var vw = window.innerWidth, best = 0, bestD = 1e9;
+      cards.forEach(function (c, i) {
+        var d = (c.offsetLeft + c.offsetWidth / 2 - cur - vw / 2) / vw;
+        if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = i; }
+        if (!reduce) {
+          var sh = Math.max(-1, Math.min(1, d)) * c.offsetWidth * 0.12;
+          inners[i].forEach(function (el) { el.style.transform = "translate3d(" + sh + "px,0,0)"; });
+        }
+      });
+      if (best !== last) { last = best; setActive(best); }
+      document.getElementById("bar").style.transform = "scaleX(" + (max ? cur / max : 0) + ")";
+      document.getElementById("hint").style.opacity = cur > 40 ? "0" : "1";
+      raf = requestAnimationFrame(tick);
+    }
+    function goTo(i) {
+      i = (i + n) % n;
+      var c = cards[i];
+      var x = c.offsetLeft + c.offsetWidth / 2 - window.innerWidth / 2;
+      window.scrollTo({ top: sec.offsetTop + Math.max(0, x), behavior: "smooth" });
+    }
+    document.getElementById("prev").onclick = function () { goTo(last - 1); };
+    document.getElementById("next").onclick = function () { goTo(last + 1); };
+    function onWheel(e) { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { e.preventDefault(); window.scrollBy(0, e.deltaX); } }
+    sec.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("resize", measure);
+    window.addEventListener("load", measure);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    measure();
+    raf = requestAnimationFrame(tick);
+    stopHero = function () {
+      alive = false;
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("load", measure);
+      window.removeEventListener("scroll", onScroll);
+    };
+
+    /* 문의 폼 (데모: 전송하지 않음) */
+    var box = document.getElementById("types");
+    box.onclick = function (e) {
+      if (e.target.tagName !== "BUTTON") return;
+      box.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === e.target)); });
+    };
+    document.getElementById("form").onsubmit = function (e) {
+      e.preventDefault();
+      var ok = ["f-name", "f-email", "f-msg"].every(function (id) { return document.getElementById(id).value.trim(); });
+      var note = document.getElementById("note");
+      note.hidden = false;
+      note.textContent = ok ? t.contact.demo : t.contact.missing;
+    };
+  }
+
+  render(pickLang());
+  window.addEventListener("hashchange", function () {
+    var h = location.hash.slice(1);
+    if (LANGS.indexOf(h) >= 0 && h !== document.documentElement.lang) render(h);
   });
 })();
 </script>
